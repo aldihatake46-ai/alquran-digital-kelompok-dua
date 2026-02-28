@@ -1,0 +1,3371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Al-Qur'an">
+<meta name="application-name" content="Al-Qur'an Digital">
+<meta name="theme-color" content="#0d3b1e">
+<meta name="description" content="Aplikasi Al-Qur'an Digital lengkap dengan terjemahan, doa harian, jadwal sholat, dan hadits pilihan">
+<title>Al-Qur'an Digital</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #0d3b1e;
+    --green-mid: #1a5c33;
+    --green-bright: #2d8a52;
+    --green-light: #4db876;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #faf6ee;
+    --cream-dark: #f0e8d8;
+    --text-dark: #1a1207;
+    --text-mid: #4a3f2f;
+    --text-light: #8a7a65;
+    --white: #ffffff;
+    --shadow-lg: 0 20px 60px rgba(13,59,30,0.18);
+    --shadow-sm: 0 4px 20px rgba(13,59,30,0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  [data-theme="dark"] {
+    --cream: #0e1a12;
+    --cream-dark: #142019;
+    --text-dark: #e8dfc8;
+    --text-mid: #b8ab95;
+    --text-light: #7a6e5a;
+    --white: #1a2a1f;
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+    --shadow-sm: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  [data-theme="dark"] .surah-arabic,
+  [data-theme="dark"] .basmalah,
+  [data-theme="dark"] .ayat-latin,
+  [data-theme="dark"] .detail-surah-name-ar { color: #e8dfc8 !important; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    transition: background 0.4s, color 0.4s;
+  }
+  /* ── BACKGROUNDS ── */
+  .bg-pattern {
+    background-color: var(--green-deep);
+    background-image: radial-gradient(circle at 20% 50%, rgba(45,138,82,0.25) 0%, transparent 60%),
+                      radial-gradient(circle at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 50%),
+                      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M30 0l30 30-30 30L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  /* ── SCREENS ── */
+  .screen { display:none !important; animation: fadeIn 0.5s ease; }
+  .screen.active { display:flex !important; flex-direction:column; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  /* ── SPLASH ── */
+  #splash {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  #splash.active { display:flex; }
+  .splash-logo {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 54px;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse {
+    0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,255,255,0.2)}
+    50%{transform:scale(1.04);box-shadow:0 0 0 20px rgba(255,255,255,0)}
+  }
+  .splash-title { font-family:'DM Serif Display',serif; font-size:42px; color:#fff; letter-spacing:2px; }
+  .splash-arabic { font-family:'Amiri',serif; font-size:28px; color:var(--gold-light); }
+  .splash-sub { color:rgba(255,255,255,0.6); font-size:14px; }
+
+  /* ── AUTH ── */
+  #auth {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+  }
+  
+  .auth-header {
+    background: linear-gradient(160deg, var(--green-deep) 0%, var(--green-mid) 100%);
+    padding: 70px 24px 44px;
+    display:flex; flex-direction:column; align-items:center;
+    gap: 10px; position:relative;
+  }
+  .auth-back-btn {
+    position:absolute; top:20px; left:16px;
+    background:rgba(255,255,255,0.15); border:none; border-radius:8px;
+    padding:8px 14px; color:#fff; cursor:pointer; font-size:13px;
+    display:flex; align-items:center; gap:6px;
+    transition:background 0.2s; font-family:'Tajawal',sans-serif;
+  }
+  .auth-back-btn:hover { background:rgba(255,255,255,0.25); }
+  .auth-header .icon { font-size:52px; }
+  .auth-header h1 { font-family:'DM Serif Display',serif; font-size:28px; color:#fff; }
+  .auth-header p { color:rgba(255,255,255,0.65); font-size:13px; }
+  .auth-body {
+    flex:1;
+    padding: 32px 24px 40px;
+    overflow-y: auto;
+  }
+  .auth-tabs {
+    display:flex; gap:4px;
+    background: var(--cream-dark);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+  .auth-tab {
+    flex:1; padding:10px; border:none; background:transparent;
+    border-radius: 9px; cursor:pointer; font-family:'Tajawal',sans-serif;
+    font-size:14px; font-weight:500; color:var(--text-light);
+    transition: all 0.25s;
+  }
+  .auth-tab.active {
+    background: var(--green-mid);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26,92,51,0.35);
+  }
+  .auth-form { display:none; }
+  .auth-form.active { display:block; animation: fadeIn 0.3s ease; }
+  .form-group { margin-bottom:16px; }
+  .form-group label {
+    display:block; font-size:13px; font-weight:500;
+    color:var(--text-mid); margin-bottom:6px;
+  }
+  .form-group input {
+    width:100%; padding:13px 16px;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: var(--radius-sm);
+    font-family:'Tajawal',sans-serif; font-size:15px;
+    background: var(--white); color:var(--text-dark);
+    outline:none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-group input:focus {
+    border-color: var(--green-bright);
+    box-shadow: 0 0 0 3px rgba(45,138,82,0.12);
+  }
+  .btn-primary {
+    width:100%; padding:15px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+    color: #fff; border:none; border-radius: var(--radius-sm);
+    font-family:'Tajawal',sans-serif; font-size:16px; font-weight:600;
+    cursor:pointer; transition: all 0.25s;
+    box-shadow: 0 6px 20px rgba(26,92,51,0.35);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 10px 28px rgba(26,92,51,0.42); }
+  .btn-primary:active { transform:translateY(0); }
+  .error-msg {
+    background: #fef2f2; border:1px solid #fee2e2;
+    color:#dc2626; border-radius:8px; padding:10px 14px;
+    font-size:13px; margin-bottom:16px; display:none;
+  }
+  /* ── HOME ── */
+  #home { }
+  #home.active { min-height:100vh; }
+  .topbar {
+    background: var(--green-deep);
+    padding: 16px 20px;
+    display:flex; align-items:center; gap:12px;
+    position:sticky; top:0; z-index:100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .topbar-title { font-family:'DM Serif Display',serif; font-size:20px; color:#fff; flex:1; }
+  .topbar-btn {
+    background: rgba(255,255,255,0.12); border:none; border-radius:8px;
+    padding:8px 10px; color:#fff; cursor:pointer; font-size:16px;
+    transition:background 0.2s; position:relative;
+  }
+  .topbar-btn:hover { background:rgba(255,255,255,0.22); }
+  .badge {
+    position:absolute; top:-4px; right:-4px;
+    background:var(--gold); color:#000; font-size:9px;
+    width:16px; height:16px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-weight:700;
+  }
+  .home-hero {
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 60%, var(--green-bright) 100%);
+    padding: 28px 20px 36px;
+    position:relative; overflow:hidden;
+  }
+  .home-hero::before {
+    content:'';
+    position:absolute; right:-20px; top:-20px;
+    width:180px; height:180px;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='rgba(255,255,255,0.04)' d='M100 10 L190 55 L190 145 L100 190 L10 145 L10 55 Z'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .hero-greet { color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:4px; }
+  .hero-name { color:#fff; font-size:22px; font-weight:700; margin-bottom:16px; }
+  .hero-stats {
+    display:flex; gap:12px;
+  }
+  .stat-card {
+    flex:1; background:rgba(255,255,255,0.12);
+    border-radius:12px; padding:12px;
+    border:1px solid rgba(255,255,255,0.15); text-align:center;
+  }
+  .stat-num { color:var(--gold-light); font-size:22px; font-weight:700; }
+  .stat-lbl { color:rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+  .search-wrap {
+    padding: 16px 20px;
+    background: var(--cream);
+    position:sticky; top:57px; z-index:99;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .search-input-wrap { position:relative; }
+  .search-input-wrap span {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-size:16px; color:var(--text-light);
+  }
+  .search-input {
+    width:100%; padding:12px 16px 12px 42px;
+    border:1.5px solid var(--cream-dark);
+    border-radius: var(--radius-sm); background:var(--white);
+    font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text-dark);
+    outline:none; transition:border-color 0.2s;
+  }
+  .search-input:focus { border-color:var(--green-bright); }
+  .surah-list { padding:12px 16px 80px; flex:1; }
+  .surah-card {
+    display:flex; align-items:center; gap:14px;
+    background:var(--white); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:10px;
+    cursor:pointer; transition:all 0.25s;
+    box-shadow: var(--shadow-sm);
+    border:1px solid transparent;
+  }
+  .surah-card:hover {
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-lg);
+    border-color:rgba(45,138,82,0.2);
+  }
+  .surah-num {
+    width:44px; height:44px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--green-mid),var(--green-bright));
+    border-radius:12px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; font-size:15px;
+    box-shadow:0 4px 12px rgba(26,92,51,0.3);
+  }
+  .surah-info { flex:1; min-width:0; }
+  .surah-name-latin { font-size:15px; font-weight:600; color:var(--text-dark); }
+  .surah-meta { font-size:12px; color:var(--text-light); margin-top:2px; }
+  .surah-badge {
+    display:inline-block; font-size:10px; padding:2px 7px;
+    border-radius:20px; margin-left:6px; font-weight:500;
+  }
+  .badge-mekah { background:rgba(201,168,76,0.15); color:var(--gold); }
+  .badge-madinah { background:rgba(45,138,82,0.12); color:var(--green-bright); }
+  .surah-arabic { font-family:'Amiri',serif; font-size:22px; color:var(--green-mid); }
+  /* ── DETAIL ── */
+  #detail { }
+  #detail.active { min-height:100vh; }
+  .detail-header {
+    background:linear-gradient(160deg, var(--green-deep) 0%, var(--green-mid) 100%);
+    padding: 20px 20px 30px;
+  }
+  .back-btn {
+    background:rgba(255,255,255,0.15); border:none; border-radius:8px;
+    padding:8px 12px; color:#fff; cursor:pointer; font-size:13px;
+    display:flex; align-items:center; gap:6px; margin-bottom:16px;
+    transition:background 0.2s;
+  }
+  .back-btn:hover { background:rgba(255,255,255,0.25); }
+  .detail-surah-name-ar { font-family:'Amiri',serif; font-size:36px; color:#fff; text-align:center; }
+  .detail-surah-name-lat { font-family:'DM Serif Display',serif; font-size:22px; color:rgba(255,255,255,0.9); text-align:center; }
+  .detail-arti { color:var(--gold-light); font-size:14px; text-align:center; margin-top:4px; }
+  .detail-chips {
+    display:flex; gap:8px; justify-content:center; margin-top:14px;
+  }
+  .chip {
+    background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+    border-radius:20px; padding:5px 14px;
+    color:#fff; font-size:12px;
+  }
+  .detail-desc {
+    background:rgba(255,255,255,0.1); border-radius:10px;
+    padding:12px 14px; margin-top:14px; color:rgba(255,255,255,0.75);
+    font-size:13px; line-height:1.6;
+  }
+  /* ── READING FEATURES ── */
+
+  /* Scroll Progress Bar */
+  .read-progress-bar {
+    position:fixed; top:0; left:0; height:3px; z-index:9999;
+    background:linear-gradient(90deg, var(--gold), var(--gold-light));
+    width:0%; transition:width 0.1s linear;
+    border-radius:0 2px 2px 0;
+    display:none;
+  }
+  #detail.active ~ .read-progress-bar,
+  .read-progress-bar.visible { display:block; }
+
+  /* Reading Toolbar (font size + fullscreen) */
+  .reading-toolbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px;
+    background:var(--white);
+    border-bottom:1px solid var(--cream-dark);
+    position:sticky; top:0; z-index:98;
+    gap:10px;
+  }
+  .font-ctrl-group {
+    display:flex; align-items:center; gap:6px;
+    background:var(--cream); border-radius:20px; padding:4px 10px;
+  }
+  .font-ctrl-label { font-size:12px; color:var(--text-light); margin-right:2px; }
+  .font-ctrl-btn {
+    width:28px; height:28px; border-radius:50%;
+    border:1.5px solid var(--cream-dark); background:var(--white);
+    cursor:pointer; font-size:14px; font-weight:700;
+    color:var(--green-mid); display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+  .font-ctrl-btn:hover { background:var(--green-mid); color:#fff; border-color:var(--green-mid); }
+  .font-size-display {
+    font-size:12px; font-weight:600; color:var(--text-mid);
+    min-width:28px; text-align:center;
+  }
+  .toolbar-right { display:flex; align-items:center; gap:8px; }
+  .fullscreen-btn {
+    background:var(--cream); border:1.5px solid var(--cream-dark);
+    border-radius:20px; padding:6px 12px;
+    cursor:pointer; font-size:12px; color:var(--text-mid);
+    display:flex; align-items:center; gap:5px;
+    transition:all 0.2s; font-family:'Tajawal',sans-serif;
+  }
+  .fullscreen-btn:hover { background:var(--green-mid); color:#fff; border-color:var(--green-mid); }
+  .last-read-btn {
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    border:none; border-radius:20px; padding:6px 12px;
+    cursor:pointer; font-size:12px; color:#1a1207; font-weight:600;
+    display:flex; align-items:center; gap:5px;
+    transition:all 0.2s; font-family:'Tajawal',sans-serif;
+    box-shadow:0 2px 8px rgba(201,168,76,0.3);
+  }
+  .last-read-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(201,168,76,0.4); }
+
+  /* Ayat font size variable */
+  #detail .ayat-arab { font-size: var(--ayat-font-size, 26px) !important; }
+  #detail .ayat-latin { font-size: var(--ayat-latin-size, 13px) !important; }
+  #detail .ayat-terjemahan { font-size: var(--ayat-terjemahan-size, 14px) !important; }
+
+  /* Last-read ayat highlight */
+  .ayat-card.last-read {
+    border:2px solid var(--gold) !important;
+    box-shadow:0 0 0 3px rgba(201,168,76,0.15), var(--shadow-sm) !important;
+    position:relative;
+  }
+  .last-read-badge {
+    position:absolute; top:-1px; right:12px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:#1a1207; font-size:9px; font-weight:700;
+    padding:2px 8px; border-radius:0 0 8px 8px;
+    letter-spacing:0.3px;
+  }
+
+  /* Fullscreen mode */
+  #detail.fullscreen .detail-header { display:none !important; }
+  #detail.fullscreen .reading-toolbar { top:0; }
+  #detail.fullscreen .ayat-container { padding-top:0; }
+  .fullscreen-exit-fab {
+    position:fixed; top:12px; right:12px; z-index:9998;
+    background:rgba(0,0,0,0.6); border:none; border-radius:50%;
+    width:36px; height:36px; color:#fff; font-size:16px;
+    cursor:pointer; display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  #detail.fullscreen ~ .fullscreen-exit-fab,
+  .fullscreen-exit-fab.show { display:flex; }
+
+  /* Ayat header now flex-between for last-read mark btn */
+  .ayat-action-btn {
+    background:none; border:none; cursor:pointer; font-size:15px;
+    padding:3px 5px; border-radius:6px; color:var(--text-light);
+    transition:all 0.2s; line-height:1;
+  }
+  .ayat-action-btn:hover { color:var(--gold); background:rgba(201,168,76,0.1); }
+  .ayat-action-btn.marked { color:var(--gold); }
+
+  /* Progress text in toolbar */
+  .read-progress-text {
+    font-size:11px; color:var(--text-light);
+    background:var(--cream); border-radius:12px; padding:4px 10px;
+  }
+
+  .ayat-container { padding:12px 16px 80px; background:var(--cream); }
+  .basmalah {
+    text-align:center; font-family:'Amiri',serif; font-size:22px;
+    color:var(--green-mid); padding:16px;
+    background:var(--white); border-radius:var(--radius);
+    margin-bottom:12px; box-shadow:var(--shadow-sm);
+  }
+  .ayat-card {
+    background:var(--white); border-radius:var(--radius);
+    margin-bottom:12px; overflow:hidden;
+    box-shadow:var(--shadow-sm);
+    border:1px solid var(--cream-dark);
+    transition:box-shadow 0.2s;
+  }
+  .ayat-card:hover { box-shadow:var(--shadow-lg); }
+  .ayat-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px;
+    border-bottom:1px solid var(--cream-dark);
+    background: var(--cream);
+  }
+  .ayat-num-badge {
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg,var(--green-mid),var(--green-bright));
+    color:#fff; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bm-btn {
+    background:none; border:none; cursor:pointer; font-size:18px;
+    padding:4px; border-radius:6px; transition:transform 0.2s;
+  }
+  .bm-btn:hover { transform:scale(1.2); }
+  .ayat-arab {
+    font-family:'Amiri',serif; font-size:26px; line-height:2.1;
+    text-align:right; direction:rtl;
+    padding:16px 18px 8px; color:var(--text-dark);
+  }
+  .ayat-latin {
+    font-style:italic; color:var(--green-bright); font-size:13px;
+    padding:0 18px 8px; line-height:1.7;
+  }
+  .ayat-terjemahan {
+    color:var(--text-mid); font-size:14px; line-height:1.7;
+    padding:0 18px 16px;
+  }
+  /* ── BOOKMARKS ── */
+  #bookmarks { }
+  #bookmarks.active { min-height:100vh; }
+  .page-topbar {
+    background:var(--green-deep); padding:16px 20px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  }
+  .page-title { font-family:'DM Serif Display',serif; font-size:20px; color:#fff; flex:1; }
+  .bm-list { padding:16px; flex:1; }
+  .bm-card {
+    background:var(--white); border-radius:var(--radius);
+    padding:16px; margin-bottom:12px;
+    box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark);
+    animation:fadeIn 0.4s ease;
+  }
+  .bm-card-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .bm-label {
+    display:flex; align-items:center; gap:8px;
+    color:var(--green-mid); font-weight:600; font-size:13px;
+  }
+  .del-btn {
+    background:none; border:none; cursor:pointer; color:#ef4444;
+    font-size:16px; padding:4px; border-radius:6px;
+    transition:background 0.2s;
+  }
+  .del-btn:hover { background:#fef2f2; }
+  .bm-arab { font-family:'Amiri',serif; font-size:22px; text-align:right; direction:rtl; line-height:1.9; color:var(--text-dark); }
+  .bm-terjemahan { color:var(--text-light); font-size:13px; margin-top:6px; line-height:1.6; }
+  .empty-state {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:80px 20px;
+    text-align:center; color:var(--text-light);
+  }
+  .empty-icon { font-size:64px; opacity:0.3; }
+  .empty-state h3 { font-size:18px; color:var(--text-mid); }
+  .empty-state p { font-size:13px; }
+  /* ── TOOLTIP / TOAST ── */
+  .toast {
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--green-deep); color:#fff; padding:10px 20px;
+    border-radius:24px; font-size:13px; z-index:9999;
+    opacity:0; transition:all 0.35s; pointer-events:none;
+    white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--white); border-top:1px solid var(--cream-dark);
+    display:flex; padding:8px 0 max(8px, env(safe-area-inset-bottom));
+    box-shadow:0 -4px 20px rgba(0,0,0,0.1); z-index:200;
+  }
+  .nav-btn {
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    gap:3px; padding:6px 4px; border:none; background:none;
+    cursor:pointer; color:var(--text-light);
+    transition:color 0.2s; font-family:'Tajawal',sans-serif;
+  }
+  .nav-btn span:first-child { font-size:20px; }
+  .nav-btn span:last-child { font-size:10px; }
+  .nav-btn.active { color:var(--green-bright); }
+  /* ── USER MENU ── */
+  .user-menu {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    z-index:500; display:none;
+    align-items: center;
+    justify-content: center;
+  }
+  .user-menu.open { display:flex; }
+  .menu-overlay {
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    animation: overlayIn 0.3s ease forwards;
+  }
+  @keyframes overlayIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+  .menu-sheet {
+    position: relative;
+    z-index: 1;
+    background:var(--white);
+    border-radius: 24px;
+    padding: 28px 24px;
+    width: 88%;
+    max-width: 380px;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  @keyframes popIn {
+    0%   { opacity:0; transform: scale(0.6) translateY(20px); }
+    60%  { opacity:1; }
+    100% { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .menu-sheet.closing {
+    animation: popOut 0.25s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  }
+  @keyframes popOut {
+    from { opacity:1; transform: scale(1) translateY(0); }
+    to   { opacity:0; transform: scale(0.8) translateY(10px); }
+  }
+  .menu-handle {
+    width:40px; height:4px; background:var(--cream-dark);
+    border-radius:2px; margin:0 auto 20px;
+  }
+  .menu-user-info {
+    display:flex; align-items:center; gap:14px;
+    padding:14px; background:var(--cream);
+    border-radius:var(--radius); margin-bottom:16px;
+  }
+  .avatar {
+    width:48px; height:48px; border-radius:50%;
+    background:linear-gradient(135deg,var(--green-mid),var(--green-bright));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:20px; font-weight:700;
+    overflow:hidden; cursor:pointer; position:relative;
+    flex-shrink:0;
+  }
+  .avatar img {
+    width:100%; height:100%; object-fit:cover; border-radius:50%;
+  }
+  .avatar-edit-hint {
+    position:absolute; bottom:0; left:0; right:0;
+    background:rgba(0,0,0,0.45); color:#fff;
+    font-size:9px; text-align:center; padding:3px 0;
+    opacity:0; transition:opacity 0.2s;
+    font-family:'Tajawal',sans-serif;
+  }
+  .avatar:hover .avatar-edit-hint { opacity:1; }
+  #photo-input { display:none; }
+  .menu-name { font-weight:600; font-size:15px; }
+  .menu-email { font-size:12px; color:var(--text-light); }
+  .menu-item {
+    display:flex; align-items:center; gap:12px;
+    padding:14px; border-radius:var(--radius-sm);
+    cursor:pointer; transition:background 0.2s; margin-bottom:4px;
+    border:none; width:100%; background:none; font-family:'Tajawal',sans-serif;
+    font-size:14px; color:var(--text-dark);
+  }
+  .menu-item:hover { background:var(--cream); }
+  .menu-item.danger { color:#ef4444; }
+  .menu-item-icon { font-size:20px; width:24px; }
+
+  /* ── HISTORY SCREEN ── */
+  #history { }
+  #history.active { min-height:100vh; }
+  .hist-list { padding:16px; flex:1; padding-bottom:80px; }
+  .hist-card {
+    background:var(--white); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:10px;
+    box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark);
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer; transition:all 0.2s; animation:fadeIn 0.3s ease;
+  }
+  .hist-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+  .hist-num {
+    width:44px; height:44px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    border-radius:12px; display:flex; align-items:center; justify-content:center;
+    color:#1a1207; font-weight:700; font-size:14px;
+  }
+  .hist-info { flex:1; min-width:0; }
+  .hist-name { font-size:14px; font-weight:600; color:var(--text-dark); }
+  .hist-time { font-size:11px; color:var(--text-light); margin-top:2px; }
+  .hist-arabic { font-family:'Amiri',serif; font-size:20px; color:var(--green-mid); }
+  .hist-clear-btn {
+    margin:0 16px 12px; padding:10px;
+    background:#fef2f2; border:1px solid #fee2e2;
+    border-radius:var(--radius-sm); color:#dc2626;
+    font-family:'Tajawal',sans-serif; font-size:13px;
+    cursor:pointer; width:calc(100% - 32px);
+    transition:background 0.2s;
+  }
+  .hist-clear-btn:hover { background:#fee2e2; }
+
+  /* ── SURAH NAVIGATION (prev/next) ── */
+  .surah-nav-bar {
+    display:flex; gap:10px; padding:16px;
+    background:var(--cream);
+    border-top:1px solid var(--cream-dark);
+  }
+  .surah-nav-btn {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 16px;
+    background:var(--white); border:1px solid var(--cream-dark);
+    border-radius:var(--radius-sm);
+    cursor:pointer; transition:all 0.2s;
+    font-family:'Tajawal',sans-serif; font-size:13px; color:var(--text-dark);
+    box-shadow:var(--shadow-sm);
+  }
+  .surah-nav-btn:hover { background:var(--green-mid); color:#fff; border-color:var(--green-mid); }
+  .surah-nav-btn:hover .nav-arrow { color:#fff; }
+  .surah-nav-btn:disabled { opacity:0.35; cursor:not-allowed; }
+  .surah-nav-btn:disabled:hover { background:var(--white); color:var(--text-dark); border-color:var(--cream-dark); }
+  .nav-arrow { font-size:18px; color:var(--green-bright); transition:color 0.2s; }
+  .nav-label { display:flex; flex-direction:column; }
+  .nav-hint { font-size:10px; color:var(--text-light); }
+  .nav-sname { font-size:13px; font-weight:600; }
+  .surah-nav-btn:hover .nav-hint,
+  .surah-nav-btn:hover .nav-sname { color:#fff; }
+
+  /* ── TRASH SCREEN ── */
+  #trash { }
+  #trash.active { min-height:100vh; }
+  .trash-list { padding:16px; flex:1; padding-bottom:90px; }
+  .trash-card {
+    background:var(--white); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:10px;
+    box-shadow:var(--shadow-sm); border:1px solid #fee2e2;
+    display:flex; align-items:center; gap:14px;
+    animation:fadeIn 0.3s ease;
+  }
+  .trash-num {
+    width:44px; height:44px; flex-shrink:0;
+    background:linear-gradient(135deg,#ef4444,#f87171);
+    border-radius:12px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; font-size:14px;
+  }
+  .trash-info { flex:1; min-width:0; }
+  .trash-name { font-size:14px; font-weight:600; color:var(--text-dark); }
+  .trash-time { font-size:11px; color:var(--text-light); margin-top:2px; }
+  .trash-arabic { font-family:'Amiri',serif; font-size:20px; color:#ef4444; }
+  .trash-actions { display:flex; gap:6px; flex-shrink:0; }
+  .trash-restore-btn {
+    background:none; border:1.5px solid var(--green-bright); cursor:pointer;
+    color:var(--green-bright); font-size:13px; padding:6px 10px;
+    border-radius:8px; transition:all 0.2s; font-family:'Tajawal',sans-serif;
+  }
+  .trash-restore-btn:hover { background:var(--green-bright); color:#fff; }
+  .trash-del-btn {
+    background:none; border:none; cursor:pointer; color:#ef4444;
+    font-size:18px; padding:6px; border-radius:8px; transition:background 0.2s;
+  }
+  .trash-del-btn:hover { background:#fef2f2; }
+  .trash-toolbar {
+    display:flex; gap:8px; padding:0 16px 12px;
+  }
+  .trash-clear-btn {
+    flex:1; padding:10px;
+    background:#fef2f2; border:1px solid #fee2e2;
+    border-radius:var(--radius-sm); color:#dc2626;
+    font-family:'Tajawal',sans-serif; font-size:13px;
+    cursor:pointer; transition:background 0.2s;
+  }
+  .trash-clear-btn:hover { background:#fee2e2; }
+  .trash-restore-all-btn {
+    flex:1; padding:10px;
+    background:rgba(45,138,82,0.08); border:1px solid rgba(45,138,82,0.3);
+    border-radius:var(--radius-sm); color:var(--green-mid);
+    font-family:'Tajawal',sans-serif; font-size:13px;
+    cursor:pointer; transition:background 0.2s;
+  }
+  .trash-restore-all-btn:hover { background:rgba(45,138,82,0.15); }
+
+  /* ── ALARM SCREEN ── */
+  #alarm { }
+  #alarm.active { min-height:100vh; }
+  .alarm-body { padding:16px; flex:1; padding-bottom:90px; overflow-y:auto; }
+  .alarm-clock-display {
+    background:linear-gradient(135deg,var(--green-deep),var(--green-mid));
+    border-radius:var(--radius); padding:28px 20px 24px;
+    text-align:center; margin-bottom:20px;
+    box-shadow:var(--shadow-lg); position:relative; overflow:hidden;
+  }
+  .alarm-clock-display::before {
+    content:''; position:absolute; top:-30px; right:-30px;
+    width:120px; height:120px;
+    background:rgba(255,255,255,0.04); border-radius:50%;
+  }
+  .alarm-live-time {
+    font-family:'DM Serif Display',serif; font-size:52px; color:#fff;
+    letter-spacing:2px; line-height:1;
+  }
+  .alarm-live-date { color:rgba(255,255,255,0.6); font-size:13px; margin-top:6px; }
+  .alarm-section-title {
+    font-size:14px; font-weight:700; color:var(--text-mid);
+    margin:16px 0 10px; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .alarm-add-card {
+    background:var(--white); border-radius:var(--radius);
+    padding:18px; box-shadow:var(--shadow-sm);
+    border:1px solid var(--cream-dark); margin-bottom:16px;
+  }
+  .alarm-time-row {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .alarm-time-input {
+    flex:1; padding:13px 16px; font-size:22px; font-weight:700;
+    font-family:'Tajawal',sans-serif; color:var(--green-mid);
+    border:2px solid var(--cream-dark); border-radius:var(--radius-sm);
+    background:var(--cream); outline:none; text-align:center;
+    transition:border-color 0.2s;
+  }
+  .alarm-time-input:focus { border-color:var(--green-bright); }
+  .alarm-label-input {
+    width:100%; padding:11px 14px; font-size:14px;
+    font-family:'Tajawal',sans-serif; color:var(--text-dark);
+    border:1.5px solid var(--cream-dark); border-radius:var(--radius-sm);
+    background:var(--white); outline:none; margin-bottom:12px;
+    transition:border-color 0.2s;
+  }
+  .alarm-label-input:focus { border-color:var(--green-bright); }
+  .sound-select-row {
+    margin-bottom:14px;
+  }
+  .sound-options {
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;
+  }
+  .sound-opt {
+    padding:8px 14px; border-radius:20px;
+    border:1.5px solid var(--cream-dark);
+    background:var(--white); font-family:'Tajawal',sans-serif;
+    font-size:12px; color:var(--text-mid); cursor:pointer;
+    transition:all 0.2s; display:flex; align-items:center; gap:5px;
+  }
+  .sound-opt.selected {
+    background:var(--green-mid); color:#fff;
+    border-color:var(--green-mid);
+    box-shadow:0 3px 10px rgba(26,92,51,0.3);
+  }
+  .sound-opt:hover:not(.selected) { border-color:var(--green-bright); color:var(--green-bright); }
+  .alarm-days-row { margin-bottom:14px; }
+  .day-chips { display:flex; gap:6px; margin-top:8px; }
+  .day-chip {
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--cream-dark); background:var(--white);
+    font-size:11px; font-weight:600; cursor:pointer;
+    color:var(--text-mid); transition:all 0.2s;
+    font-family:'Tajawal',sans-serif;
+  }
+  .day-chip.active {
+    background:var(--green-bright); color:#fff;
+    border-color:var(--green-bright);
+  }
+  .btn-add-alarm {
+    width:100%; padding:14px;
+    background:linear-gradient(135deg,var(--green-mid),var(--green-bright));
+    color:#fff; border:none; border-radius:var(--radius-sm);
+    font-family:'Tajawal',sans-serif; font-size:15px; font-weight:600;
+    cursor:pointer; transition:all 0.25s;
+    box-shadow:0 6px 18px rgba(26,92,51,0.3);
+  }
+  .btn-add-alarm:hover { transform:translateY(-2px); }
+  .alarm-list { }
+  .alarm-item {
+    background:var(--white); border-radius:var(--radius);
+    padding:16px; margin-bottom:10px;
+    box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark);
+    display:flex; align-items:center; gap:14px;
+    animation:fadeIn 0.3s ease; transition:all 0.2s;
+  }
+  .alarm-item.off { opacity:0.55; }
+  .alarm-item-time { font-size:26px; font-weight:700; color:var(--green-mid); font-family:'DM Serif Display',serif; min-width:80px; }
+  .alarm-item-info { flex:1; }
+  .alarm-item-label { font-size:13px; font-weight:600; color:var(--text-dark); }
+  .alarm-item-meta { font-size:11px; color:var(--text-light); margin-top:2px; }
+  .alarm-item-del { background:none; border:none; cursor:pointer; color:#ef4444; font-size:18px; padding:6px; border-radius:8px; transition:background 0.2s; }
+  .alarm-item-del:hover { background:#fef2f2; }
+  .alarm-ringing-overlay {
+    position:fixed; top:0;left:0;right:0;bottom:0;
+    background:rgba(13,59,30,0.96); z-index:9000;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:20px; animation:fadeIn 0.4s ease;
+  }
+  .alarm-ringing-overlay.show { display:flex; }
+  .ring-icon { font-size:80px; animation:ringShake 0.5s infinite; }
+  @keyframes ringShake {
+    0%,100%{transform:rotate(-10deg) scale(1.05)}
+    50%{transform:rotate(10deg) scale(1.05)}
+  }
+  .ring-time { font-family:'DM Serif Display',serif; font-size:56px; color:#fff; }
+  .ring-label { color:var(--gold-light); font-size:18px; }
+  .ring-stop-btn {
+    margin-top:16px; padding:16px 48px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:#1a1207; border:none; border-radius:50px;
+    font-family:'Tajawal',sans-serif; font-size:16px; font-weight:700;
+    cursor:pointer; box-shadow:0 8px 24px rgba(201,168,76,0.4);
+  }
+
+  .pw-wrap { position:relative; }
+  .pw-wrap input { padding-right:44px !important; }
+  .pw-eye {
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; color:var(--text-light);
+    font-size:18px; padding:4px; border-radius:6px; line-height:1;
+    transition:color 0.2s;
+  }
+  .pw-eye:hover { color:var(--green-bright); }
+
+  /* toggle switch */
+  .toggle-wrap { display:flex; align-items:center; justify-content:space-between; flex:1; }
+  .toggle {
+    width:44px; height:24px; border-radius:12px;
+    background:var(--cream-dark); border:none; cursor:pointer;
+    position:relative; transition:background 0.25s;
+  }
+  .toggle.on { background:var(--green-bright); }
+  .toggle::after {
+    content:''; position:absolute; top:3px; left:3px;
+    width:18px; height:18px; border-radius:50%; background:#fff;
+    transition:transform 0.25s; box-shadow:0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle.on::after { transform:translateX(20px); }
+
+  /* ══════════════════════════════════════
+     KONTEN ISLAMI, PROFIL, PENGATURAN
+  ══════════════════════════════════════ */
+
+  /* Shared page body */
+  .page-body { padding:16px; flex:1; overflow-y:auto; padding-bottom:90px; }
+
+  /* Section card */
+  .section-card {
+    background:var(--white); border-radius:var(--radius);
+    box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark);
+    margin-bottom:14px; overflow:hidden;
+  }
+  .section-card-title {
+    padding:14px 16px 10px;
+    font-size:13px; font-weight:700; color:var(--text-light);
+    text-transform:uppercase; letter-spacing:0.5px;
+    border-bottom:1px solid var(--cream-dark);
+  }
+
+  /* DOA HARIAN */
+  .doa-tabs { display:flex; gap:6px; padding:12px 16px 0; flex-wrap:wrap; }
+  .doa-tab {
+    padding:6px 14px; border-radius:20px; font-size:12px;
+    border:1.5px solid var(--cream-dark); background:var(--white);
+    cursor:pointer; color:var(--text-mid); font-family:'Tajawal',sans-serif;
+    transition:all 0.2s;
+  }
+  .doa-tab.active { background:var(--green-mid); color:#fff; border-color:var(--green-mid); }
+  .doa-list { padding:12px 16px 16px; }
+  .doa-card {
+    background:var(--white); border-radius:var(--radius);
+    border:1px solid var(--cream-dark); margin-bottom:12px;
+    box-shadow:var(--shadow-sm); overflow:hidden;
+    animation:fadeIn 0.3s ease;
+  }
+  .doa-card-header {
+    padding:12px 16px; background:linear-gradient(135deg,var(--green-deep),var(--green-mid));
+    display:flex; align-items:center; gap:10px;
+  }
+  .doa-icon { font-size:20px; }
+  .doa-title { color:#fff; font-size:14px; font-weight:600; }
+  .doa-arab {
+    font-family:'Amiri',serif; font-size:24px; line-height:2;
+    text-align:right; direction:rtl; padding:16px 18px 8px;
+    color:var(--text-dark);
+  }
+  .doa-latin { font-style:italic; color:var(--green-bright); font-size:13px; padding:0 18px 6px; line-height:1.7; }
+  .doa-terjemahan { color:var(--text-mid); font-size:13px; padding:0 18px 14px; line-height:1.7; }
+
+  /* JADWAL SHOLAT */
+  .sholat-header {
+    background:linear-gradient(135deg,var(--green-deep),var(--green-mid));
+    border-radius:var(--radius); padding:20px; margin-bottom:16px;
+    text-align:center; color:#fff;
+  }
+  .sholat-city { font-size:13px; color:rgba(255,255,255,0.6); }
+  .sholat-date { font-size:15px; font-weight:600; margin-top:4px; color:var(--gold-light); }
+  .sholat-next-label { font-size:12px; color:rgba(255,255,255,0.6); margin-top:10px; }
+  .sholat-next-name { font-size:24px; font-weight:700; font-family:'DM Serif Display',serif; }
+  .sholat-next-time { font-size:14px; color:var(--gold-light); }
+  .sholat-list { display:flex; flex-direction:column; gap:10px; }
+  .sholat-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; background:var(--white); border-radius:var(--radius-sm);
+    box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark);
+    transition:all 0.2s;
+  }
+  .sholat-item.next {
+    border:2px solid var(--green-bright);
+    background:rgba(45,138,82,0.05);
+    box-shadow:0 0 0 3px rgba(45,138,82,0.1);
+  }
+  .sholat-name { font-size:15px; font-weight:600; color:var(--text-dark); display:flex; align-items:center; gap:8px; }
+  .sholat-time { font-size:20px; font-weight:700; color:var(--green-mid); font-family:'DM Serif Display',serif; }
+  .sholat-next-badge {
+    font-size:10px; background:var(--green-bright); color:#fff;
+    padding:2px 7px; border-radius:10px;
+  }
+  .sholat-city-input {
+    width:100%; padding:12px 14px; border:1.5px solid var(--cream-dark);
+    border-radius:var(--radius-sm); font-family:'Tajawal',sans-serif;
+    font-size:14px; background:var(--white); color:var(--text-dark);
+    outline:none; margin-bottom:10px; transition:border-color 0.2s;
+  }
+  .sholat-city-input:focus { border-color:var(--green-bright); }
+
+  /* HADITS */
+  .hadits-card {
+    background:var(--white); border-radius:var(--radius);
+    border:1px solid var(--cream-dark); margin-bottom:14px;
+    box-shadow:var(--shadow-sm); overflow:hidden; animation:fadeIn 0.3s;
+  }
+  .hadits-header {
+    background:linear-gradient(135deg,#1e3a5f,#2563eb);
+    padding:12px 16px; display:flex; align-items:center; gap:10px;
+  }
+  .hadits-num {
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,0.2); color:#fff;
+    font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .hadits-source { color:rgba(255,255,255,0.8); font-size:12px; }
+  .hadits-arab {
+    font-family:'Amiri',serif; font-size:22px; line-height:2;
+    text-align:right; direction:rtl; padding:16px 18px 8px;
+    color:var(--text-dark);
+  }
+  .hadits-terjemahan { color:var(--text-mid); font-size:13px; padding:0 18px 14px; line-height:1.7; }
+  .hadits-perawi { color:var(--text-light); font-size:11px; padding:0 18px 14px; font-style:italic; }
+
+  /* PROFIL */
+  .profil-avatar-section {
+    display:flex; flex-direction:column; align-items:center;
+    padding:24px 16px; background:linear-gradient(135deg,var(--green-deep),var(--green-mid));
+    border-radius:var(--radius); margin-bottom:14px;
+  }
+  .profil-avatar {
+    width:80px; height:80px; border-radius:50%;
+    background:rgba(255,255,255,0.2); border:3px solid rgba(255,255,255,0.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px; cursor:pointer; overflow:hidden; position:relative;
+    margin-bottom:12px;
+  }
+  .profil-name { color:#fff; font-size:18px; font-weight:700; }
+  .profil-email { color:rgba(255,255,255,0.7); font-size:13px; margin-top:2px; }
+  .profil-change-photo { 
+    margin-top:8px; font-size:12px; color:var(--gold-light);
+    background:none; border:1px solid rgba(255,255,255,0.3);
+    border-radius:16px; padding:5px 14px; cursor:pointer;
+    font-family:'Tajawal',sans-serif;
+  }
+  .profil-form { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow-sm); border:1px solid var(--cream-dark); overflow:hidden; margin-bottom:14px; }
+  .profil-form-title { padding:14px 16px 10px; font-size:13px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--cream-dark); }
+  .profil-form-body { padding:16px; }
+  .profil-input {
+    width:100%; padding:12px 14px; border:1.5px solid var(--cream-dark);
+    border-radius:var(--radius-sm); font-family:'Tajawal',sans-serif;
+    font-size:14px; background:var(--white); color:var(--text-dark);
+    outline:none; margin-bottom:12px; transition:border-color 0.2s;
+  }
+  .profil-input:focus { border-color:var(--green-bright); }
+  .profil-save-btn {
+    width:100%; padding:13px; background:linear-gradient(135deg,var(--green-mid),var(--green-bright));
+    color:#fff; border:none; border-radius:var(--radius-sm);
+    font-family:'Tajawal',sans-serif; font-size:14px; font-weight:600;
+    cursor:pointer; transition:all 0.2s; box-shadow:0 4px 14px rgba(26,92,51,0.25);
+  }
+  .profil-save-btn:hover { transform:translateY(-1px); }
+  .profil-danger-btn {
+    width:100%; padding:13px; background:#fef2f2; border:1px solid #fecaca;
+    color:#dc2626; border-radius:var(--radius-sm);
+    font-family:'Tajawal',sans-serif; font-size:14px; font-weight:600;
+    cursor:pointer; transition:background 0.2s; margin-top:6px;
+  }
+  .profil-danger-btn:hover { background:#fee2e2; }
+
+  /* PENGATURAN */
+  .setting-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; border-bottom:1px solid var(--cream-dark);
+  }
+  .setting-item:last-child { border-bottom:none; }
+  .setting-label { font-size:14px; color:var(--text-dark); display:flex; align-items:center; gap:10px; }
+  .setting-icon { font-size:18px; width:24px; text-align:center; }
+  .setting-value { font-size:13px; color:var(--text-light); }
+  .theme-picker { display:flex; gap:8px; flex-wrap:wrap; padding:12px 16px; }
+  .theme-chip {
+    width:36px; height:36px; border-radius:50%; cursor:pointer;
+    border:3px solid transparent; transition:all 0.2s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .theme-chip.active { border-color:var(--text-dark); transform:scale(1.1); }
+  .font-arab-opts { display:flex; gap:8px; flex-wrap:wrap; padding:12px 16px; }
+  .font-arab-opt {
+    padding:8px 14px; border-radius:var(--radius-sm);
+    border:1.5px solid var(--cream-dark); background:var(--white);
+    cursor:pointer; transition:all 0.2s; font-size:18px;
+  }
+  .font-arab-opt.active { border-color:var(--green-bright); background:rgba(45,138,82,0.08); }
+  .lang-opts { display:flex; gap:8px; padding:12px 16px; }
+  .lang-opt {
+    flex:1; padding:10px; border-radius:var(--radius-sm);
+    border:1.5px solid var(--cream-dark); background:var(--white);
+    cursor:pointer; text-align:center; font-size:13px; font-weight:600;
+    transition:all 0.2s; font-family:'Tajawal',sans-serif; color:var(--text-mid);
+  }
+  .lang-opt.active { border-color:var(--green-bright); color:var(--green-bright); background:rgba(45,138,82,0.08); }
+
+  /* Theme color overrides */
+  [data-theme-color="biru"] {
+    --green-deep:#0d2b4a; --green-mid:#1a4c7a; --green-bright:#2d7ab5; --green-light:#4db8f0; --gold:#c9a84c; --gold-light:#e8c97a;
+  }
+  [data-theme-color="ungu"] {
+    --green-deep:#2d0d4a; --green-mid:#4c1a7a; --green-bright:#7c3ab5; --green-light:#b06ef0; --gold:#c9a84c; --gold-light:#e8c97a;
+  }
+  [data-theme-color="merah"] {
+    --green-deep:#4a0d0d; --green-mid:#7a1a1a; --green-bright:#b52d2d; --green-light:#e06060; --gold:#c9a84c; --gold-light:#e8c97a;
+  }
+  [data-theme-color="teal"] {
+    --green-deep:#0d3a3a; --green-mid:#1a6060; --green-bright:#2d9090; --green-light:#4db8b8; --gold:#c9a84c; --gold-light:#e8c97a;
+  }
+
+  /* Font Arab overrides */
+  .arab-font-uthmani .ayat-arab, .arab-font-uthmani .basmalah, .arab-font-uthmani .detail-surah-name-ar, .arab-font-uthmani .surah-arabic { font-family:'Amiri',serif !important; }
+  .arab-font-modern .ayat-arab, .arab-font-modern .basmalah, .arab-font-modern .detail-surah-name-ar, .arab-font-modern .surah-arabic { font-family:'Tajawal',sans-serif !important; }
+
+  /* Language */
+  [data-lang="en"] .l-beranda::after { content:'Home'; }
+  [data-lang="id"] .l-beranda::after { content:'Beranda'; }
+
+
+  /* ── PWA INSTALL BANNER ── */
+  .pwa-banner {
+    position: fixed; bottom: 70px; left: 12px; right: 12px;
+    background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+    border-radius: var(--radius); padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    z-index: 8888; animation: slideUp 0.4s ease;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .pwa-banner-icon { font-size: 32px; flex-shrink: 0; }
+  .pwa-banner-text { flex: 1; }
+  .pwa-banner-title { color: #fff; font-size: 14px; font-weight: 700; }
+  .pwa-banner-sub { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 2px; }
+  .pwa-install-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #1a1207; border: none; border-radius: 20px;
+    padding: 8px 16px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Tajawal', sans-serif;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .pwa-close-btn {
+    background: none; border: none; color: rgba(255,255,255,0.6);
+    font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active bg-pattern" style="min-height:100vh;align-items:center;justify-content:center;gap:24px;">
+  <div class="splash-logo">📖</div>
+  <div class="splash-title">Al-Qur'an</div>
+  <div class="splash-arabic">الْقُرْآنُ الْكَرِيمُ</div>
+  <div class="splash-sub">Bacaan Mulia untuk Jiwa yang Tenang</div>
+  <button onclick="showScreen('auth')" style="margin-top:12px;padding:14px 48px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#1a1207;border:none;border-radius:50px;font-family:'Tajawal',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(201,168,76,0.5);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Mulai Membaca ✨</button>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="screen">
+  <div class="auth-header">
+    <button class="auth-back-btn" onclick="showScreen('welcome')">← Kembali</button>
+    <div class="icon">☪️</div>
+    <h1>Al-Qur'an Digital</h1>
+    <p>Mulai perjalanan spiritual Anda</p>
+  </div>
+  <div class="auth-body">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Masuk</button>
+      <button class="auth-tab" onclick="switchTab('register')">Daftar</button>
+    </div>
+    <!-- Login Form -->
+    <div id="form-login" class="auth-form active">
+      <div id="err-login" class="error-msg"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="contohkelompok2@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="login-pass" placeholder="••••••••" />
+          <button type="button" class="pw-eye" onclick="togglePw('login-pass', this)" title="Lihat password">👁️</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Masuk Sekarang</button>
+    </div>
+    <!-- Register Form -->
+    <div id="form-register" class="auth-form">
+      <div id="err-register" class="error-msg"></div>
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="reg-nama" placeholder="Kelompok 2" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="contohkelompok2@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="reg-pass" placeholder="Minimal 6 karakter" />
+          <button type="button" class="pw-eye" onclick="togglePw('reg-pass', this)" title="Lihat password">👁️</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="doRegister()">Buat Akun</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
+  <div class="topbar">
+    <span style="font-size:22px">📖</span>
+    <span class="topbar-title">Al-Qur'an</span>
+    <button class="topbar-btn" onclick="openUserMenu()" id="topbar-avatar" style="padding:0;width:36px;height:36px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px;">
+      <span id="topbar-avatar-letter">👤</span>
+    </button>
+  </div>
+  <div class="home-hero">
+    <div class="hero-greet">Assalamu'alaikum,</div>
+    <div class="hero-name" id="hero-name">Pengguna</div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-surah">7</div>
+        <div class="stat-lbl">Surah</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-bm">0</div>
+        <div class="stat-lbl">Bookmark</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">🌙</div>
+        <div class="stat-lbl">Offline</div>
+      </div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-input-wrap">
+      <span>🔍</span>
+      <input class="search-input" type="text" id="search-input" placeholder="Cari surah..." oninput="doSearch(this.value)" />
+    </div>
+  </div>
+  <div class="surah-list" id="surah-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- DETAIL SURAH -->
+<div id="detail" class="screen">
+  <div class="detail-header" id="detail-header"></div>
+  <!-- Reading Toolbar -->
+  <div class="reading-toolbar" id="reading-toolbar">
+    <div class="font-ctrl-group">
+      <span class="font-ctrl-label">Aa</span>
+      <button class="font-ctrl-btn" onclick="changeFontSize(-2)" title="Perkecil">−</button>
+      <span class="font-size-display" id="font-size-display">26</span>
+      <button class="font-ctrl-btn" onclick="changeFontSize(2)" title="Perbesar">+</button>
+    </div>
+    <div class="toolbar-right">
+      <span class="read-progress-text" id="read-progress-text">0%</span>
+      <button class="last-read-btn" id="jump-last-btn" onclick="jumpToLastRead()" style="display:none;">📍 Lanjut Baca</button>
+      <button class="fullscreen-btn" onclick="toggleFullscreen()" id="fs-btn">⛶ Fokus</button>
+    </div>
+  </div>
+  <div class="ayat-container" id="ayat-container"></div>
+</div>
+
+<!-- Progress Bar (outside #detail so it's always on top) -->
+<div class="read-progress-bar" id="read-progress-bar"></div>
+<!-- Fullscreen Exit FAB -->
+<button class="fullscreen-exit-fab" id="fs-exit-fab" onclick="toggleFullscreen()" title="Keluar Fokus">✕</button>
+
+<!-- BOOKMARKS -->
+<div id="bookmarks" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('home')">← Kembali</button>
+    <span class="page-title">Bookmark Saya</span>
+  </div>
+  <div class="bm-list" id="bm-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn active" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="history" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('home')">← Kembali</button>
+    <span class="page-title">Riwayat Bacaan</span>
+  </div>
+  <div id="hist-list" class="hist-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- ALARM -->
+<div id="alarm" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('home')">← Kembali</button>
+    <span class="page-title">⏰ Alarm & Pengingat</span>
+  </div>
+  <div class="alarm-body">
+    <!-- Live clock -->
+    <div class="alarm-clock-display">
+      <div class="alarm-live-time" id="alarm-live-time">00:00:00</div>
+      <div class="alarm-live-date" id="alarm-live-date">—</div>
+    </div>
+
+    <!-- Add alarm form -->
+    <div class="alarm-section-title">➕ Tambah Alarm Baru</div>
+    <div class="alarm-add-card">
+      <div class="alarm-time-row">
+        <input type="time" class="alarm-time-input" id="new-alarm-time" value="05:00" />
+      </div>
+      <input type="text" class="alarm-label-input" id="new-alarm-label" placeholder="Label alarm (cth: Sholat Subuh)" maxlength="40" />
+
+      <div class="sound-select-row">
+        <div class="alarm-section-title" style="margin:0 0 6px;font-size:12px;">🔔 Pilih Bunyi</div>
+        <div class="sound-options" id="sound-options">
+          <button class="sound-opt selected" data-sound="adzan" onclick="selectSound(this)">🕌 Adzan</button>
+          <button class="sound-opt" data-sound="beep" onclick="selectSound(this)">📳 Bip</button>
+          <button class="sound-opt" data-sound="quran" onclick="selectSound(this)">📖 Tilawah</button>
+          <button class="sound-opt" data-sound="nature" onclick="selectSound(this)">🌿 Alam</button>
+          <button class="sound-opt" data-sound="bell" onclick="selectSound(this)">🔔 Lonceng</button>
+        </div>
+      </div>
+
+      <div class="alarm-days-row">
+        <div class="alarm-section-title" style="margin:0 0 6px;font-size:12px;">📅 Ulangi Hari</div>
+        <div class="day-chips" id="day-chips">
+          <div class="day-chip" data-day="0" onclick="toggleDay(this)">Min</div>
+          <div class="day-chip" data-day="1" onclick="toggleDay(this)">Sen</div>
+          <div class="day-chip" data-day="2" onclick="toggleDay(this)">Sel</div>
+          <div class="day-chip" data-day="3" onclick="toggleDay(this)">Rab</div>
+          <div class="day-chip" data-day="4" onclick="toggleDay(this)">Kam</div>
+          <div class="day-chip" data-day="5" onclick="toggleDay(this)">Jum</div>
+          <div class="day-chip" data-day="6" onclick="toggleDay(this)">Sab</div>
+        </div>
+      </div>
+
+      <button class="btn-add-alarm" onclick="addAlarm()">✅ Simpan Alarm</button>
+    </div>
+
+    <!-- Saved alarms list -->
+    <div class="alarm-section-title">🔔 Alarm Tersimpan</div>
+    <div class="alarm-list" id="alarm-list"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn active" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- ALARM RINGING OVERLAY -->
+<div class="alarm-ringing-overlay" id="alarm-ringing">
+  <div class="ring-icon">🔔</div>
+  <div class="ring-time" id="ring-time">05:00</div>
+  <div class="ring-label" id="ring-label">Waktunya!</div>
+  <button class="ring-stop-btn" onclick="stopAlarm()">⏹ Matikan Alarm</button>
+</div>
+
+<!-- TRASH / RIWAYAT SAMPAH -->
+<div id="trash" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('home')">← Kembali</button>
+    <span class="page-title">🗑️ Riwayat Sampah</span>
+  </div>
+  <div id="trash-toolbar" class="trash-toolbar" style="padding-top:16px;display:none;">
+    <button class="trash-restore-all-btn" onclick="restoreAllTrash()">♻️ Pulihkan Semua</button>
+    <button class="trash-clear-btn" onclick="clearAllTrash()">🗑️ Hapus Permanen</button>
+  </div>
+  <div class="trash-list" id="trash-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+
+<!-- DOA HARIAN -->
+<div id="doa" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">🤲 Doa Harian</span>
+  </div>
+  <div class="doa-tabs" id="doa-tabs"></div>
+  <div class="doa-list" id="doa-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- JADWAL SHOLAT -->
+<div id="sholat" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">🕌 Jadwal Sholat</span>
+  </div>
+  <div class="page-body">
+    <div class="sholat-header">
+      <div class="sholat-city" id="sholat-city-display">—</div>
+      <div class="sholat-date" id="sholat-date-display">—</div>
+      <div style="margin-top:14px;">
+        <div class="sholat-next-label">Sholat Berikutnya</div>
+        <div class="sholat-next-name" id="sholat-next-name">—</div>
+        <div class="sholat-next-time" id="sholat-next-time">—</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">🔍 Cari kota (nama dalam Bahasa Indonesia/Inggris)</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" class="sholat-city-input" id="sholat-city-input" placeholder="cth: Lumajang, Surabaya, Jakarta..." style="margin-bottom:0;flex:1;" onkeydown="if(event.key==='Enter') loadSholatByCity()" />
+        <button class="profil-save-btn" onclick="loadSholatByCity()" style="margin-bottom:0;width:auto;padding:0 18px;flex-shrink:0;">Cari</button>
+      </div>
+    </div>
+    <div class="sholat-list" id="sholat-list"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- HADITS PILIHAN -->
+<div id="hadits" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">📚 Hadits Pilihan</span>
+  </div>
+  <div class="page-body" id="hadits-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- MORE (menu konten islami, profil, pengaturan) -->
+<div id="more" class="screen">
+  <div class="page-topbar">
+    <span class="page-title">☰ Menu Lainnya</span>
+    <div onclick="showNav('profil')" style="display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(255,255,255,0.12);border-radius:24px;padding:5px 12px 5px 5px;border:1px solid rgba(255,255,255,0.2);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      <div id="more-avatar" style="width:34px;height:34px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.4);flex-shrink:0;">
+        <span id="more-avatar-letter" style="font-size:16px;color:#fff;font-weight:700;">?</span>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.3;">
+        <span id="more-topbar-name" style="font-size:13px;font-weight:600;color:#fff;">—</span>
+        <span id="more-topbar-email" style="font-size:10px;color:rgba(255,255,255,0.6);">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-body">
+    <!-- Konten Islami -->
+    <div class="section-card">
+      <div class="section-card-title">🕌 Konten Islami</div>
+      <div class="setting-item" onclick="showNav('doa')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">🤲</span> Doa Harian</span>
+        <span class="setting-value">›</span>
+      </div>
+      <div class="setting-item" onclick="showNav('sholat')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">🕌</span> Jadwal Sholat</span>
+        <span class="setting-value">›</span>
+      </div>
+      <div class="setting-item" onclick="showNav('hadits')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">📚</span> Hadits Pilihan</span>
+        <span class="setting-value">›</span>
+      </div>
+    </div>
+    <!-- Riwayat -->
+    <div class="section-card">
+      <div class="section-card-title">📋 Riwayat</div>
+      <div class="setting-item" onclick="showNav('history')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">📜</span> Riwayat Bacaan</span>
+        <span class="setting-value">›</span>
+      </div>
+      <div class="setting-item" onclick="showNav('trash')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">🗑️</span> Riwayat Sampah</span>
+        <span class="setting-value">›</span>
+      </div>
+    </div>
+    <!-- Profil -->
+    <div class="section-card">
+      <div class="section-card-title">👤 Akun</div>
+      <div class="setting-item" onclick="showNav('profil')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">✏️</span> Edit Profil</span>
+        <span class="setting-value">›</span>
+      </div>
+      <div class="setting-item" onclick="showNav('gantipass')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">🔑</span> Ganti Password</span>
+        <span class="setting-value">›</span>
+      </div>
+    </div>
+    <!-- Pengaturan -->
+    <div class="section-card">
+      <div class="section-card-title">⚙️ Pengaturan</div>
+      <div class="setting-item" onclick="showNav('settings')" style="cursor:pointer;">
+        <span class="setting-label"><span class="setting-icon">🎨</span> Tema & Tampilan</span>
+        <span class="setting-value">›</span>
+      </div>
+    </div>
+    <!-- Logout -->
+    <button class="profil-danger-btn" onclick="doLogout()" style="margin-top:6px;">🚪 Keluar Akun</button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- PROFIL (edit nama & email) -->
+<div id="profil" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">✏️ Edit Profil</span>
+  </div>
+  <div class="page-body">
+    <div class="profil-avatar-section">
+      <div class="profil-avatar" id="profil-avatar" onclick="document.getElementById('profil-photo-input').click()">
+        <span id="profil-avatar-letter">👤</span>
+      </div>
+      <input type="file" id="profil-photo-input" accept="image/*" onchange="handlePhotoUpload(event)" style="display:none;">
+      <div class="profil-name" id="profil-name-display">—</div>
+      <div class="profil-email" id="profil-email-display">—</div>
+      <button class="profil-change-photo" onclick="document.getElementById('profil-photo-input').click()">📷 Ganti Foto</button>
+    </div>
+    <div class="profil-form">
+      <div class="profil-form-title">Informasi Akun</div>
+      <div class="profil-form-body">
+        <div id="err-profil" class="error-msg"></div>
+        <label style="font-size:12px;color:var(--text-light);margin-bottom:4px;display:block;">Nama Lengkap</label>
+        <input type="text" class="profil-input" id="profil-nama" placeholder="Nama lengkap" />
+        <label style="font-size:12px;color:var(--text-light);margin-bottom:4px;display:block;">Email</label>
+        <input type="email" class="profil-input" id="profil-email" placeholder="Email" />
+        <button class="profil-save-btn" onclick="saveProfil()">✅ Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- GANTI PASSWORD -->
+<div id="gantipass" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">🔑 Ganti Password</span>
+  </div>
+  <div class="page-body">
+    <div class="profil-form">
+      <div class="profil-form-title">Ubah Password</div>
+      <div class="profil-form-body">
+        <div id="err-gantipass" class="error-msg"></div>
+        <label style="font-size:12px;color:var(--text-light);margin-bottom:4px;display:block;">Password Lama</label>
+        <div class="pw-wrap" style="margin-bottom:12px;">
+          <input type="password" class="profil-input" id="pass-lama" placeholder="Password saat ini" style="margin-bottom:0;" />
+          <button type="button" class="pw-eye" onclick="togglePw('pass-lama',this)">👁️</button>
+        </div>
+        <label style="font-size:12px;color:var(--text-light);margin-bottom:4px;display:block;">Password Baru</label>
+        <div class="pw-wrap" style="margin-bottom:12px;">
+          <input type="password" class="profil-input" id="pass-baru" placeholder="Minimal 6 karakter" style="margin-bottom:0;" />
+          <button type="button" class="pw-eye" onclick="togglePw('pass-baru',this)">👁️</button>
+        </div>
+        <label style="font-size:12px;color:var(--text-light);margin-bottom:4px;display:block;">Konfirmasi Password Baru</label>
+        <div class="pw-wrap" style="margin-bottom:14px;">
+          <input type="password" class="profil-input" id="pass-konfirm" placeholder="Ulangi password baru" style="margin-bottom:0;" />
+          <button type="button" class="pw-eye" onclick="togglePw('pass-konfirm',this)">👁️</button>
+        </div>
+        <button class="profil-save-btn" onclick="saveGantiPass()">✅ Ganti Password</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- SETTINGS (tema, font arab, bahasa) -->
+<div id="settings" class="screen">
+  <div class="page-topbar">
+    <button class="back-btn" style="margin-bottom:0;flex-shrink:0" onclick="showNav('more')">← Kembali</button>
+    <span class="page-title">🎨 Tema & Tampilan</span>
+  </div>
+  <div class="page-body">
+    <!-- Tema Warna -->
+    <div class="section-card">
+      <div class="section-card-title">🎨 Tema Warna</div>
+      <div class="theme-picker" id="theme-picker">
+        <div class="theme-chip active" data-color="hijau" onclick="applyThemeColor(this)" style="background:linear-gradient(135deg,#0d3b1e,#2d8a52);" title="Hijau"></div>
+        <div class="theme-chip" data-color="biru" onclick="applyThemeColor(this)" style="background:linear-gradient(135deg,#0d2b4a,#2d7ab5);" title="Biru"></div>
+        <div class="theme-chip" data-color="ungu" onclick="applyThemeColor(this)" style="background:linear-gradient(135deg,#2d0d4a,#7c3ab5);" title="Ungu"></div>
+        <div class="theme-chip" data-color="merah" onclick="applyThemeColor(this)" style="background:linear-gradient(135deg,#4a0d0d,#b52d2d);" title="Merah"></div>
+        <div class="theme-chip" data-color="teal" onclick="applyThemeColor(this)" style="background:linear-gradient(135deg,#0d3a3a,#2d9090);" title="Teal"></div>
+      </div>
+    </div>
+    <!-- Font Arab -->
+    <div class="section-card">
+      <div class="section-card-title">🔤 Font Tulisan Arab</div>
+      <div class="font-arab-opts" id="font-arab-opts">
+        <button class="font-arab-opt active" data-font="uthmani" onclick="applyArabFont(this)">
+          <div style="font-family:'Amiri',serif;font-size:20px;direction:rtl;">بِسْمِ اللّٰه</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:4px;">Uthmani (Amiri)</div>
+        </button>
+        <button class="font-arab-opt" data-font="modern" onclick="applyArabFont(this)">
+          <div style="font-family:'Tajawal',sans-serif;font-size:20px;direction:rtl;">بِسْمِ اللّٰه</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:4px;">Modern (Tajawal)</div>
+        </button>
+      </div>
+    </div>
+    <!-- Bahasa -->
+    <div class="section-card">
+      <div class="section-card-title">🌐 Bahasa Terjemahan</div>
+      <div class="lang-opts" id="lang-opts">
+        <button class="lang-opt active" data-lang="id" onclick="applyLang(this)">🇮🇩 Indonesia</button>
+        <button class="lang-opt" data-lang="en" onclick="applyLang(this)">🇬🇧 English</button>
+      </div>
+    </div>
+    <!-- Dark Mode -->
+    <div class="section-card">
+      <div class="section-card-title">💡 Tampilan</div>
+      <div class="setting-item">
+        <span class="setting-label"><span class="setting-icon">🌙</span> Mode Gelap</span>
+        <button class="toggle" id="settings-dark-toggle" onclick="toggleDarkMode()"></button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showNav('home')"><span>🏠</span><span>Beranda</span></button>
+    <button class="nav-btn" onclick="showNav('bookmarks')"><span>🔖</span><span>Bookmark</span></button>
+    <button class="nav-btn" onclick="showNav('alarm')"><span>⏰</span><span>Alarm</span></button>
+    <button class="nav-btn active" onclick="showNav('more')"><span>☰</span><span>Lainnya</span></button>
+  </div>
+</div>
+
+<!-- USER MENU -->
+<div class="user-menu" id="user-menu">
+  <div class="menu-overlay" onclick="closeUserMenu()"></div>
+  <div class="menu-sheet" id="menu-sheet">
+    <div class="menu-handle"></div>
+    <div class="menu-user-info">
+      <div class="avatar" id="menu-avatar" onclick="document.getElementById('photo-input').click()" title="Ganti foto">
+        <span id="menu-avatar-letter">A</span>
+        <div class="avatar-edit-hint">Ganti</div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(event)">
+      <div>
+        <div class="menu-name" id="menu-name">-</div>
+        <div class="menu-email" id="menu-email">-</div>
+      </div>
+    </div>
+    <button class="menu-item" onclick="toggleDarkMode()">
+      <span class="menu-item-icon">🌙</span>
+      <span class="toggle-wrap">
+        <span>Mode Gelap</span>
+        <button class="toggle" id="dark-toggle"></button>
+      </span>
+    </button>
+    <button class="menu-item danger" onclick="doLogout()">
+      <span class="menu-item-icon">🚪</span>
+      <span>Keluar</span>
+    </button>
+  </div>
+</div>
+
+
+<!-- PWA INSTALL BANNER -->
+<div class="pwa-banner" id="pwa-banner" style="display:none;">
+  <div class="pwa-banner-icon">📖</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">Install Al-Qur'an Digital</div>
+    <div class="pwa-banner-sub">Tambahkan ke layar utama HP kamu</div>
+  </div>
+  <button class="pwa-install-btn" id="pwa-install-btn">Install</button>
+  <button class="pwa-close-btn" onclick="dismissPWA()">✕</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════
+//  DATA AL-QUR'AN
+// ════════════════════════════════════════
+const QURAN_DATA = [
+  {
+    nomor:1, nama:"الفاتحة", namaLatin:"Al-Fatihah", arti:"Pembukaan",
+    jumlahAyat:7, tempatTurun:"Mekah",
+    deskripsi:"Surah pembuka Al-Qur'an. Disebut Ummul Kitab (induk kitab). Wajib dibaca dalam setiap rakaat shalat.",
+    ayat:[
+      {n:1,arab:"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",latin:"Bismillāhir-raḥmānir-raḥīm",terjemahan:"Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."},
+      {n:2,arab:"الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",latin:"Al-ḥamdu lillāhi rabbil-'ālamīn",terjemahan:"Segala puji bagi Allah, Tuhan seluruh alam,"},
+      {n:3,arab:"الرَّحْمَٰنِ الرَّحِيمِ",latin:"Ar-raḥmānir-raḥīm",terjemahan:"Yang Maha Pengasih, Maha Penyayang,"},
+      {n:4,arab:"مَالِكِ يَوْمِ الدِّينِ",latin:"Māliki yawmid-dīn",terjemahan:"Pemilik hari pembalasan."},
+      {n:5,arab:"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",latin:"Iyyāka na'budu wa iyyāka nasta'īn",terjemahan:"Hanya kepada Engkaulah kami menyembah dan hanya kepada Engkaulah kami mohon pertolongan."},
+      {n:6,arab:"اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",latin:"Ihdinaṣ-ṣirāṭal-mustaqīm",terjemahan:"Tunjukilah kami jalan yang lurus,"},
+      {n:7,arab:"صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",latin:"Ṣirāṭallażīna an'amta 'alaihim gairil-magḍụbi 'alaihim wa laḍ-ḍāllīn",terjemahan:"(yaitu) jalan orang-orang yang telah Engkau beri nikmat kepadanya; bukan (jalan) mereka yang dimurkai, dan bukan (pula jalan) mereka yang sesat."}
+    ]
+  },
+  {
+    nomor:2, nama:"الْبَقَرَة", namaLatin:"Al-Baqarah", arti:"Sapi Betina",
+    jumlahAyat:286, tempatTurun:"Madinah",
+    deskripsi:"Surah terpanjang dalam Al-Qur'an. Berisi banyak hukum Islam, kisah Bani Israil, dan Ayat Kursi.",
+    ayat:[
+      {n:1,arab:"الم",latin:"Alif lām mīm",terjemahan:"Alif Lam Mim."},
+      {n:2,arab:"ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ",latin:"Żālikal-kitābu lā raiba fīh, hudal lil-muttaqīn",terjemahan:"Kitab (Al-Qur'an) ini tidak ada keraguan padanya; petunjuk bagi mereka yang bertakwa,"},
+      {n:3,arab:"الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ",latin:"Allażīna yu'minụna bil-gaib wa yuqīmụnaṣ-ṣalāta wa mimmā razaqnāhum yunfiqụn",terjemahan:"(yaitu) mereka yang beriman kepada yang gaib, melaksanakan salat, dan menginfakkan sebagian rezeki yang Kami berikan kepada mereka,"},
+      {n:255,arab:"اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ",latin:"Allāhu lā ilāha illā huw, al-ḥayyul-qayyụm, lā ta'khużuhụ sinatuw wa lā naụm",terjemahan:"Allah, tidak ada tuhan selain Dia. Yang Mahahidup, Yang terus menerus mengurus (makhluk-Nya), tidak mengantuk dan tidak tidur. (Ayat Kursi)"}
+    ]
+  },
+ {
+    nomor:102, nama:"التَّكَاثُر", namaLatin:"At-Takasur", arti:"Bermegah-megahan",
+    jumlahAyat:8, tempatTurun:"Mekah",
+    deskripsi:"Mengingatkan manusia tentang sifat bermegah-megahan dalam urusan dunia hingga masuk ke liang kubur.",
+    ayat:[
+      {n:1,arab:"أَلْهَاكُمُ التَّكَاثُرُ",latin:"Al-hākumut-takāṡur",terjemahan:"Bermegah-megahan telah melalaikan kamu,"},
+      {n:2,arab:"حَتَّىٰ زُرْتُمُ الْمَقَابِرَ",latin:"Ḥattā zurtumul-maqābir",terjemahan:"sampai kamu masuk ke dalam kubur."},
+      {n:3,arab:"كَلَّا سَوْفَ تَعْلَمُونَ",latin:"Kallā saufa ta'lamūn",terjemahan:"Sekali-kali tidak! Kelak kamu akan mengetahui (akibat perbuatanmu itu),"},
+      {n:4,arab:"ثُمَّ كَلَّا سَوْفَ تَعْلَمُونَ",latin:"Ṡumma kallā saufa ta'lamūn",terjemahan:"kemudian sekali-kali tidak! Kelak kamu akan mengetahui."},
+      {n:5,arab:"كَلَّا لَوْ تَعْلَمُونَ عِلْمَ الْيَقِينِ",latin:"Kallā lau ta'lamūna 'ilmal-yaqīn",terjemahan:"Sekali-kali tidak! Sekiranya kamu mengetahui dengan pasti,"},
+      {n:6,arab:"لَتَرَوُنَّ الْجَحِيمَ",latin:"Latarawunnal-jaḥīm",terjemahan:"niscaya kamu benar-benar akan melihat neraka Jahim,"},
+      {n:7,arab:"ثُمَّ لَتَرَوُنَّهَا عَيْنَ الْيَقِينِ",latin:"Ṡumma latarawunnahā 'aynal-yaqīn",terjemahan:"kemudian kamu benar-benar akan melihatnya dengan mata kepala sendiri,"},
+      {n:8,arab:"ثُمَّ لَتُسْأَلُنَّ يَوْمَئِذٍ عَنِ النَّعِيمِ",latin:"Ṡumma latus'alunna yauma'iżin 'anin-na'īm",terjemahan:"kemudian kamu benar-benar akan ditanya pada hari itu tentang kenikmatan (yang megah di dunia itu)."}
+    ]
+  },
+  {
+    nomor:103, nama:"الْعَصْر", namaLatin:"Al-Asr", arti:"Masa",
+    jumlahAyat:3, tempatTurun:"Mekah",
+    deskripsi:"Surah yang sangat singkat namun mengandung inti ajaran Islam. Imam Syafi'i berkata: 'Cukuplah surah ini sebagai pelajaran bagi manusia.'",
+    ayat:[
+      {n:1,arab:"وَالْعَصْرِ",latin:"Wal-'aṣr",terjemahan:"Demi masa,"},
+      {n:2,arab:"إِنَّ الْإِنسَانَ لَفِي خُسْرٍ",latin:"Innal-insāna lafī khusr",terjemahan:"sungguh, manusia berada dalam kerugian,"},
+      {n:3,arab:"إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ",latin:"Illallażīna āmanū wa 'amiluṣ-ṣāliḥāti wa tawāṣau bil-ḥaqqi wa tawāṣau biṣ-ṣabr",terjemahan:"kecuali orang-orang yang beriman dan mengerjakan kebajikan serta saling menasihati untuk kebenaran dan saling menasihati untuk kesabaran."}
+    ]
+  },
+  {
+    nomor:104, nama:"الْهُمَزَة", namaLatin:"Al-Humazah", arti:"Pengumpat",
+    jumlahAyat:9, tempatTurun:"Mekah",
+    deskripsi:"Mencela orang yang suka mengumpat, mencela, dan menghimpun harta dengan berlebihan.",
+    ayat:[
+      {n:1,arab:"وَيْلٌ لِّكُلِّ هُمَزَةٍ لُّمَزَةٍ",latin:"Wailul likulli humazatil lumazah",terjemahan:"Celakalah bagi setiap pengumpat dan pencela,"},
+      {n:2,arab:"الَّذِي جَمَعَ مَالًا وَعَدَّدَهُ",latin:"Allażī jama'a mālaw wa 'addadah",terjemahan:"yang mengumpulkan harta dan menghitung-hitungnya,"},
+      {n:3,arab:"يَحْسَبُ أَنَّ مَالَهُ أَخْلَدَهُ",latin:"Yaḥsabu anna mālahū akhladah",terjemahan:"dia mengira bahwa hartanya itu dapat mengekalkannya."},
+      {n:4,arab:"كَلَّا لَيُنبَذَنَّ فِي الْحُطَمَةِ",latin:"Kallā layumbaża nna fil-ḥuṭamah",terjemahan:"Sekali-kali tidak! Pasti dia akan dilemparkan ke dalam (neraka) Hutamah."},
+      {n:5,arab:"وَمَا أَدْرَاكَ مَا الْحُطَمَةُ",latin:"Wa mā adrāka mal-ḥuṭamah",terjemahan:"Dan tahukah kamu apa Hutamah itu?"}
+    ]
+  },
+  {
+    nomor:105, nama:"الْفِيل", namaLatin:"Al-Fil", arti:"Gajah",
+    jumlahAyat:5, tempatTurun:"Mekah",
+    deskripsi:"Menceritakan kisah pasukan bergajah pimpinan Abrahah yang hancur lebur ketika hendak menghancurkan Ka'bah.",
+    ayat:[
+      {n:1,arab:"أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَابِ الْفِيلِ",latin:"Alam tara kaifa fa'ala rabbuka bi'aṣḥābil-fīl",terjemahan:"Tidakkah engkau (Muhammad) memperhatikan bagaimana Tuhanmu telah bertindak terhadap pasukan bergajah?"},
+      {n:2,arab:"أَلَمْ يَجْعَلْ كَيْدَهُمْ فِي تَضْلِيلٍ",latin:"Alam yaj'al kaidahum fī taḍlīl",terjemahan:"Bukankah Dia telah menjadikan tipu daya mereka itu sia-sia?"},
+      {n:3,arab:"وَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ",latin:"Wa arsala 'alaihim ṭairan abābīl",terjemahan:"dan Dia mengirimkan kepada mereka burung yang berbondong-bondong,"},
+      {n:4,arab:"تَرْمِيهِم بِحِجَارَةٍ مِّن سِجِّيلٍ",latin:"Tarmīhim biḥijāratim min sijjīl",terjemahan:"yang melempari mereka dengan batu dari tanah liat yang dibakar,"},
+      {n:5,arab:"فَجَعَلَهُمْ كَعَصْفٍ مَّأْكُولٍ",latin:"Faja'alahum ka'aṣfim ma'kūl",terjemahan:"sehingga mereka dijadikan-Nya seperti daun-daun yang dimakan (ulat)."}
+    ]
+  },
+  {
+    nomor:106, nama:"قُرَيْش", namaLatin:"Quraisy", arti:"Suku Quraisy",
+    jumlahAyat:4, tempatTurun:"Mekah",
+    deskripsi:"Mengingatkan suku Quraisy agar bersyukur kepada Allah yang telah memberi mereka keamanan dan kemakmuran.",
+    ayat:[
+      {n:1,arab:"لِإِيلَافِ قُرَيْشٍ",latin:"Li'īlāfi quraisy",terjemahan:"Karena kebiasaan orang-orang Quraisy,"},
+      {n:2,arab:"إِۦلَٰفِهِمْ رِحْلَةَ الشِّتَآءِ وَالصَّيْفِ",latin:"Īlāfihim riḥlatasy-syitā'i waṣ-ṣaif",terjemahan:"(yaitu) kebiasaan mereka bepergian pada musim dingin dan musim panas."},
+      {n:3,arab:"فَلْيَعْبُدُوا رَبَّ هَٰذَا الْبَيْتِ",latin:"Falya'budū rabba hāżal-bait",terjemahan:"Maka hendaklah mereka menyembah Tuhan (pemilik) rumah ini (Ka'bah),"},
+      {n:4,arab:"الَّذِي أَطْعَمَهُم مِّن جُوعٍ وَآمَنَهُم مِّنْ خَوْفٍ",latin:"Allażī aṭ'amahum min jū'iw wa āmanahum min khauf",terjemahan:"yang telah memberi mereka makanan untuk menghilangkan lapar dan mengamankan mereka dari rasa takut."}
+    ]
+  },
+  {
+    nomor:107, nama:"الْمَاعُون", namaLatin:"Al-Ma'un", arti:"Bantuan",
+    jumlahAyat:7, tempatTurun:"Mekah",
+    deskripsi:"Mencela orang yang mendustakan agama, yaitu yang menelantarkan anak yatim dan enggan memberikan bantuan kepada sesama.",
+    ayat:[
+      {n:1,arab:"أَرَأَيْتَ الَّذِي يُكَذِّبُ بِالدِّينِ",latin:"Ara'aital-lażī yukażżibu bid-dīn",terjemahan:"Tahukah kamu (orang) yang mendustakan agama?"},
+      {n:2,arab:"فَذَٰلِكَ الَّذِي يَدُعُّ الْيَتِيمَ",latin:"Fa żālikal-lażī yadu''ul-yatīm",terjemahan:"Maka itulah orang yang menghardik anak yatim,"},
+      {n:3,arab:"وَلَا يَحُضُّ عَلَىٰ طَعَامِ الْمِسْكِينِ",latin:"Wa lā yaḥuḍḍu 'alā ṭa'āmil-miskīn",terjemahan:"dan tidak mendorong memberi makan orang miskin."},
+      {n:4,arab:"فَوَيْلٌ لِّلْمُصَلِّينَ",latin:"Fa wailul lil-muṣallīn",terjemahan:"Maka celakalah orang yang salat,"},
+      {n:5,arab:"الَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ",latin:"Allażīna hum 'an ṣalātihim sāhūn",terjemahan:"(yaitu) orang-orang yang lalai terhadap salatnya,"}
+    ]
+  },
+  {
+    nomor:108, nama:"الْكَوْثَر", namaLatin:"Al-Kausar", arti:"Nikmat yang Banyak",
+    jumlahAyat:3, tempatTurun:"Mekah",
+    deskripsi:"Surah terpendek dalam Al-Qur'an. Allah memberi kabar gembira kepada Nabi Muhammad dengan nikmat yang banyak (Al-Kausar).",
+    ayat:[
+      {n:1,arab:"إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ",latin:"Innā a'ṭainākal-kauṡar",terjemahan:"Sungguh, Kami telah memberimu (Muhammad) nikmat yang banyak."},
+      {n:2,arab:"فَصَلِّ لِرَبِّكَ وَانْحَرْ",latin:"Fa ṣalli lirabbika wan-ḥar",terjemahan:"Maka laksanakanlah salat karena Tuhanmu, dan berkurbanlah (sebagai ibadah dan mendekatkan diri kepada Allah)."},
+      {n:3,arab:"إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ",latin:"Inna syāni'aka huwal-abtar",terjemahan:"Sungguh, orang-orang yang membencimu dialah yang terputus (dari rahmat Allah)."}
+    ]
+  },
+  {
+    nomor:109, nama:"الْكَافِرُون", namaLatin:"Al-Kafirun", arti:"Orang-orang Kafir",
+    jumlahAyat:6, tempatTurun:"Mekah",
+    deskripsi:"Menegaskan prinsip toleransi beragama dan penolakan tegas terhadap sinkretisme dalam ibadah.",
+    ayat:[
+      {n:1,arab:"قُلْ يَا أَيُّهَا الْكَافِرُونَ",latin:"Qul yā ayyuhal-kāfirūn",terjemahan:"Katakanlah (Muhammad), 'Wahai orang-orang kafir!'"},
+      {n:2,arab:"لَا أَعْبُدُ مَا تَعْبُدُونَ",latin:"Lā a'budu mā ta'budūn",terjemahan:"Aku tidak akan menyembah apa yang kamu sembah,"},
+      {n:3,arab:"وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",latin:"Wa lā antum 'ābidūna mā a'bud",terjemahan:"dan kamu bukan penyembah apa yang aku sembah,"},
+      {n:4,arab:"وَلَا أَنَا عَابِدٌ مَّا عَبَدتُّمْ",latin:"Wa lā ana 'ābidum mā 'abattum",terjemahan:"dan aku tidak pernah menjadi penyembah apa yang kamu sembah,"},
+      {n:5,arab:"وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",latin:"Wa lā antum 'ābidūna mā a'bud",terjemahan:"dan kamu tidak pernah (pula) menjadi penyembah apa yang aku sembah."},
+      {n:6,arab:"لَكُمْ دِينُكُمْ وَلِيَ دِينِ",latin:"Lakum dīnukum wa liya dīn",terjemahan:"Untukmu agamamu, dan untukku agamaku.'"}
+    ]
+  },
+  {
+    nomor:110, nama:"النَّصْر", namaLatin:"An-Nasr", arti:"Pertolongan",
+    jumlahAyat:3, tempatTurun:"Madinah",
+    deskripsi:"Mengabarkan kemenangan Islam dan penaklukan Mekah. Dianggap sebagai tanda wafatnya Nabi Muhammad SAW.",
+    ayat:[
+      {n:1,arab:"إِذَا جَاءَ نَصْرُ اللَّهِ وَالْفَتْحُ",latin:"Iżā jā'a naṣrullāhi wal-fatḥ",terjemahan:"Apabila telah datang pertolongan Allah dan kemenangan,"},
+      {n:2,arab:"وَرَأَيْتَ النَّاسَ يَدْخُلُونَ فِي دِينِ اللَّهِ أَفْوَاجًا",latin:"Wa ra'aitan-nāsa yadkhulūna fī dīnillāhi afwājā",terjemahan:"dan engkau melihat manusia berbondong-bondong masuk agama Allah,"},
+      {n:3,arab:"فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُ إِنَّهُ كَانَ تَوَّابًا",latin:"Fasabbiḥ biḥamdi rabbika wastagfirh, innahū kāna tawwābā",terjemahan:"maka bertasbihlah dengan memuji Tuhanmu dan mohonlah ampunan kepada-Nya. Sungguh, Dia Maha Penerima tobat."}
+    ]
+  },
+  {
+    nomor:111, nama:"الْمَسَد", namaLatin:"Al-Masad", arti:"Gejolak Api",
+    jumlahAyat:5, tempatTurun:"Mekah",
+    deskripsi:"Menceritakan kebinasaan Abu Lahab dan istrinya karena permusuhannya terhadap Nabi Muhammad SAW.",
+    ayat:[
+      {n:1,arab:"تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ",latin:"Tabbat yadā abī lahabiw wa tabb",terjemahan:"Binasalah kedua tangan Abu Lahab dan benar-benar binasa dia!"},
+      {n:2,arab:"مَا أَغْنَىٰ عَنْهُ مَالُهُ وَمَا كَسَبَ",latin:"Mā aghnā 'anhu māluhu wa mā kasab",terjemahan:"Tidaklah berguna baginya hartanya dan apa yang dia usahakan."},
+      {n:3,arab:"سَيَصْلَىٰ نَارًا ذَاتَ لَهَبٍ",latin:"Sayaṣlā nāran żāta lahab",terjemahan:"Kelak dia akan masuk ke dalam api yang bergejolak (neraka)."},
+      {n:4,arab:"وَامْرَأَتُهُ حَمَّالَةَ الْحَطَبِ",latin:"Wamra'atuhū ḥammālatal-ḥaṭab",terjemahan:"Dan (begitu pula) istrinya, pembawa kayu bakar (penyebar fitnah)."},
+      {n:5,arab:"فِي جِيدِهَا حَبْلٌ مِّن مَّسَدٍ",latin:"Fī jīdihā ḥablum mim masad",terjemahan:"Di lehernya ada tali dari sabut yang dipintal."}
+    ]
+  },
+  {
+    nomor:112, nama:"الْإِخْلَاص", namaLatin:"Al-Ikhlas", arti:"Ikhlas",
+    jumlahAyat:4, tempatTurun:"Mekah",
+    deskripsi:"Membaca surah ini setara dengan sepertiga Al-Qur'an. Membahas tauhid secara padat.",
+    ayat:[
+      {n:1,arab:"قُلْ هُوَ اللَّهُ أَحَدٌ",latin:"Qul huwallāhu aḥad",terjemahan:"Katakanlah (Muhammad), 'Dialah Allah, Yang Maha Esa.'"},
+      {n:2,arab:"اللَّهُ الصَّمَدُ",latin:"Allāhuṣ-ṣamad",terjemahan:"Allah tempat meminta segala sesuatu."},
+      {n:3,arab:"لَمْ يَلِدْ وَلَمْ يُولَدْ",latin:"Lam yalid wa lam yụlad",terjemahan:"(Allah) tidak beranak dan tidak pula diperanakkan."},
+      {n:4,arab:"وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",latin:"Wa lam yakul lahụ kufuwan aḥad",terjemahan:"Dan tidak ada sesuatu yang setara dengan Dia."}
+    ]
+  },
+  {
+    nomor:113, nama:"الْفَلَق", namaLatin:"Al-Falaq", arti:"Waktu Subuh",
+    jumlahAyat:5, tempatTurun:"Mekah",
+    deskripsi:"Surah perlindungan (mu'awwidzatain) bersama An-Nas. Mengajarkan berlindung kepada Allah dari berbagai keburukan.",
+    ayat:[
+      {n:1,arab:"قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ",latin:"Qul a'ūżubirabbil-falaq",terjemahan:"Katakanlah, 'Aku berlindung kepada Tuhan yang menguasai subuh (fajar),'"},
+      {n:2,arab:"مِن شَرِّ مَا خَلَقَ",latin:"Min syarri mā khalaq",terjemahan:"dari kejahatan (makhluk yang) Dia ciptakan,"},
+      {n:3,arab:"وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ",latin:"Wa min syarri gāsiqin iżā waqab",terjemahan:"dan dari kejahatan malam apabila telah gelap gulita,"},
+      {n:4,arab:"وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ",latin:"Wa min syarrin-naffāṡāti fil-'uqad",terjemahan:"dan dari kejahatan (perempuan-perempuan) penyihir yang meniup pada buhul-buhul (talinya),"},
+      {n:5,arab:"وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",latin:"Wa min syarri ḥāsidin iżā ḥasad",terjemahan:"dan dari kejahatan orang yang dengki apabila dia dengki.'"}
+    ]
+  },
+  {
+    nomor:114, nama:"النَّاس", namaLatin:"An-Nas", arti:"Manusia",
+    jumlahAyat:6, tempatTurun:"Mekah",
+    deskripsi:"Surah terakhir Al-Qur'an. Mengajarkan berlindung kepada Allah dari bisikan setan.",
+    ayat:[
+      {n:1,arab:"قُلْ أَعُوذُ بِرَبِّ النَّاسِ",latin:"Qul a'ụżu birabbin-nās",terjemahan:"Katakanlah, 'Aku berlindung kepada Tuhannya manusia,'"},
+      {n:2,arab:"مَلِكِ النَّاسِ",latin:"Malikin-nās",terjemahan:"Raja manusia,"},
+      {n:3,arab:"إِلَٰهِ النَّاسِ",latin:"Ilāhin-nās",terjemahan:"Sembahan manusia,"},
+      {n:4,arab:"مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ",latin:"Min syarril-waswāsil-khannās",terjemahan:"dari kejahatan (setan) yang bersembunyi,"},
+      {n:5,arab:"الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ",latin:"Allażī yuwaswisu fī ṣudụrin-nās",terjemahan:"yang membisikkan (kejahatan) ke dalam dada manusia,"},
+      {n:6,arab:"مِنَ الْجِنَّةِ وَالنَّاسِ",latin:"Minal-jinnati wan-nās",terjemahan:"dari (golongan) jin dan manusia.'"}
+    ]
+  }
+];
+
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let currentUser = null;
+let bookmarks = [];
+let isDark = false;
+
+// ════════════════════════════════════════
+//  STORAGE HELPERS
+// ════════════════════════════════════════
+function save(key, val){ try{localStorage.setItem(key,JSON.stringify(val))}catch(e){} }
+function load(key,def){ try{const v=localStorage.getItem(key);return v?JSON.parse(v):def}catch(e){return def} }
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  isDark = load('dark', false);
+  applyDark();
+  currentUser = load('current_user', null);
+  bookmarks = load('bookmarks', []);
+  if(currentUser){
+    showScreen('home');
+    initHome();
+  }
+});
+
+// ════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showNav(page){
+  // Hide progress bar and fullscreen when leaving detail
+  const bar = document.getElementById('read-progress-bar');
+  if(bar) bar.style.display = 'none';
+  const detail = document.getElementById('detail');
+  if(detail && detail.classList.contains('fullscreen')){
+    detail.classList.remove('fullscreen');
+    isFullscreen = false;
+    const fab = document.getElementById('fs-exit-fab');
+    if(fab) fab.classList.remove('show');
+  }
+  if(page==='home'){
+    showScreen('home');
+    renderSurahList(QURAN_DATA);
+  } else if(page==='bookmarks'){
+    showScreen('bookmarks');
+    renderBookmarks();
+  } else if(page==='history'){
+    showScreen('history');
+    renderHistory();
+  } else if(page==='alarm'){
+    showScreen('alarm');
+    initAlarm();
+  } else if(page==='trash'){
+    showScreen('trash');
+    renderTrash();
+  } else if(page==='more'){
+    showScreen('more');
+    refreshAvatar();
+  } else if(page==='doa'){
+    showScreen('doa');
+    initDoa();
+  } else if(page==='sholat'){
+    showScreen('sholat');
+    initSholat();
+  } else if(page==='hadits'){
+    showScreen('hadits');
+    renderHadits();
+  } else if(page==='profil'){
+    showScreen('profil');
+    initProfil();
+  } else if(page==='gantipass'){
+    showScreen('gantipass');
+    document.getElementById('err-gantipass').style.display='none';
+  } else if(page==='settings'){
+    showScreen('settings');
+    initSettings();
+  }
+}
+
+// ════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════
+function togglePw(inputId, btn){
+  const inp = document.getElementById(inputId);
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  btn.textContent = isHidden ? '🙈' : '👁️';
+  btn.title = isHidden ? 'Sembunyikan password' : 'Lihat password';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register'));
+  });
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-register').classList.toggle('active', tab==='register');
+}
+
+function showErr(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 4000);
+}
+
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if(!email||!pass){ showErr('err-login','Email dan password wajib diisi'); return; }
+  const users = load('users',[]);
+  const user = users.find(u=>u.email===email && u.password===pass);
+  if(!user){ showErr('err-login','Email atau password salah'); return; }
+  currentUser = user;
+  save('current_user', user);
+  showScreen('home');
+  initHome();
+}
+
+function doRegister(){
+  const nama = document.getElementById('reg-nama').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if(!nama||!email||!pass){ showErr('err-register','Semua field wajib diisi'); return; }
+  if(pass.length < 6){ showErr('err-register','Password minimal 6 karakter'); return; }
+  const users = load('users',[]);
+  if(users.find(u=>u.email===email)){ showErr('err-register','Email sudah terdaftar'); return; }
+  const user = { id: Date.now().toString(), nama, email, password: pass };
+  users.push(user);
+  save('users', users);
+  showSuccessRegister(email, pass);
+}
+
+function showSuccessRegister(email, pass){
+  showToast('✅ Akun berhasil dibuat!');
+  document.getElementById('reg-nama').value = '';
+  document.getElementById('reg-email').value = '';
+  document.getElementById('reg-pass').value = '';
+  setTimeout(()=>{
+    switchTab('login');
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-pass').value = pass;
+    const info = document.getElementById('err-login');
+    info.style.display = 'block';
+    info.style.background = '#f0fdf4';
+    info.style.borderColor = '#bbf7d0';
+    info.style.color = '#15803d';
+    info.textContent = '✅ Akun berhasil dibuat! Silakan klik Masuk.';
+  }, 1200);
+}
+
+function doLogout(){
+  currentUser = null;
+  localStorage.removeItem('current_user');
+  closeUserMenu();
+  showScreen('auth');
+}
+
+// ════════════════════════════════════════
+//  HOME
+// ════════════════════════════════════════
+function initHome(){
+  document.getElementById('hero-name').textContent = currentUser?.nama || 'Pengguna';
+  updateBmBadge();
+  renderSurahList(QURAN_DATA);
+  refreshAvatar();
+  // Load alarms and start checker
+  alarms = load('alarms', []);
+  if(!alarmCheckInterval) alarmCheckInterval = setInterval(checkAlarms, 10000);
+  // Apply saved settings
+  applyAllSettings();
+}
+
+function updateBmBadge(){
+  document.getElementById('stat-bm').textContent = bookmarks.length;
+}
+
+function renderSurahList(list){
+  const el = document.getElementById('surah-list');
+  if(!list.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-light)">Surah tidak ditemukan</div>'; return; }
+  el.innerHTML = list.map(s=>`
+    <div class="surah-card" onclick="openDetail(${s.nomor})">
+      <div class="surah-num">${s.nomor}</div>
+      <div class="surah-info">
+        <div class="surah-name-latin">${s.namaLatin}
+          <span class="surah-badge ${s.tempatTurun==='Mekah'?'badge-mekah':'badge-madinah'}">${s.tempatTurun}</span>
+        </div>
+        <div class="surah-meta">${s.arti} &bull; ${s.jumlahAyat} ayat</div>
+      </div>
+      <div class="surah-arabic">${s.nama}</div>
+    </div>
+  `).join('');
+}
+
+function doSearch(q){
+  q = q.toLowerCase();
+  if(!q){ renderSurahList(QURAN_DATA); return; }
+  renderSurahList(QURAN_DATA.filter(s=>
+    s.namaLatin.toLowerCase().includes(q) ||
+    s.arti.toLowerCase().includes(q) ||
+    s.nomor.toString().includes(q)
+  ));
+}
+
+// ════════════════════════════════════════
+//  DETAIL
+// ════════════════════════════════════════
+let currentSurahNomor = null;
+let ayatFontSize = 26;
+
+function openDetail(nomor){
+  const s = QURAN_DATA.find(x=>x.nomor===nomor);
+  if(!s) return;
+
+  currentSurahNomor = nomor;
+  addHistory(s);
+
+  // Restore saved font size
+  ayatFontSize = load('ayat_font_size', 26);
+  applyFontSize();
+
+  const isBm = bookmarks.some(b=>b.id===`surah_${s.nomor}`);
+  document.getElementById('detail-header').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <button class="back-btn" style="margin-bottom:0" onclick="showNav('home')">← Kembali</button>
+      <button id="bm-surah-btn" onclick="toggleSurahBm(${s.nomor})"
+        style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:7px 16px;color:#fff;cursor:pointer;font-size:13px;font-family:'Tajawal',sans-serif;display:flex;align-items:center;gap:6px;transition:all 0.2s;">
+        ${isBm ? '🔖 Tersimpan' : '🏷️ Simpan Surah'}
+      </button>
+    </div>
+    <div class="detail-surah-name-ar">${s.nama}</div>
+    <div class="detail-surah-name-lat">${s.namaLatin}</div>
+    <div class="detail-arti">${s.arti}</div>
+    <div class="detail-chips">
+      <span class="chip">${s.tempatTurun}</span>
+      <span class="chip">${s.jumlahAyat} Ayat</span>
+      <span class="chip">Surah ke-${s.nomor}</span>
+    </div>
+    <div class="detail-desc">${s.deskripsi}</div>
+  `;
+
+  const basmalah = (s.nomor!==1 && s.nomor!==9)
+    ? `<div class="basmalah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>` : '';
+
+  // Find prev/next surah
+  const idx = QURAN_DATA.findIndex(x=>x.nomor===nomor);
+  const prevS = idx > 0 ? QURAN_DATA[idx-1] : null;
+  const nextS = idx < QURAN_DATA.length-1 ? QURAN_DATA[idx+1] : null;
+
+  const navBar = `
+    <div class="surah-nav-bar">
+      <button class="surah-nav-btn" onclick="${prevS ? `openDetail(${prevS.nomor})` : ''}" ${prevS?'':'disabled'}>
+        <span class="nav-arrow">←</span>
+        <span class="nav-label">
+          <span class="nav-hint">Sebelumnya</span>
+          <span class="nav-sname">${prevS ? prevS.namaLatin : '—'}</span>
+        </span>
+      </button>
+      <button class="surah-nav-btn" onclick="${nextS ? `openDetail(${nextS.nomor})` : ''}" ${nextS?'':'disabled'} style="justify-content:flex-end;text-align:right;">
+        <span class="nav-label">
+          <span class="nav-hint">Selanjutnya</span>
+          <span class="nav-sname">${nextS ? nextS.namaLatin : '—'}</span>
+        </span>
+        <span class="nav-arrow">→</span>
+      </button>
+    </div>
+  `;
+
+  // Load last-read ayat for this surah
+  const lastReadKey = `last_read_${nomor}`;
+  const lastReadAyat = load(lastReadKey, null);
+
+  document.getElementById('ayat-container').innerHTML =
+    basmalah + s.ayat.map(a => {
+      const isLastRead = lastReadAyat === a.n;
+      const lastBadge = isLastRead ? `<div class="last-read-badge">📍 Terakhir Dibaca</div>` : '';
+      return `
+      <div class="ayat-card ${isLastRead ? 'last-read' : ''}" id="ayat-${a.n}" style="position:relative;">
+        ${lastBadge}
+        <div class="ayat-header">
+          <div class="ayat-num-badge">${a.n}</div>
+          <button class="ayat-action-btn ${isLastRead?'marked':''}" onclick="markLastRead(${nomor}, ${a.n})" title="Tandai sebagai terakhir dibaca">📍</button>
+        </div>
+        <div class="ayat-arab">${a.arab}</div>
+        <div class="ayat-latin">${a.latin}</div>
+        <div class="ayat-terjemahan">${a.terjemahan}</div>
+      </div>`;
+    }).join('') + navBar;
+
+  showScreen('detail');
+  const detailEl = document.getElementById('detail');
+  detailEl.scrollTop = 0;
+
+  // Show/hide "Lanjut Baca" button
+  const jumpBtn = document.getElementById('jump-last-btn');
+  if(jumpBtn) jumpBtn.style.display = lastReadAyat ? 'flex' : 'none';
+
+  // Init scroll progress
+  initScrollProgress(detailEl, s.ayat.length);
+
+  // Exit fullscreen if was in it
+  if(detailEl.classList.contains('fullscreen')){
+    detailEl.classList.remove('fullscreen');
+    document.getElementById('fs-exit-fab').classList.remove('show');
+    document.getElementById('fs-btn').innerHTML = '⛶ Fokus';
+  }
+}
+
+function escJs(s){ return s.replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════
+//  READING FEATURES
+// ════════════════════════════════════════
+
+// ── Font Size ──
+function changeFontSize(delta){
+  ayatFontSize = Math.min(40, Math.max(16, ayatFontSize + delta));
+  save('ayat_font_size', ayatFontSize);
+  applyFontSize();
+}
+
+function applyFontSize(){
+  const detail = document.getElementById('detail');
+  if(!detail) return;
+  detail.style.setProperty('--ayat-font-size', ayatFontSize + 'px');
+  detail.style.setProperty('--ayat-latin-size', Math.max(11, ayatFontSize - 13) + 'px');
+  detail.style.setProperty('--ayat-terjemahan-size', Math.max(12, ayatFontSize - 12) + 'px');
+  const disp = document.getElementById('font-size-display');
+  if(disp) disp.textContent = ayatFontSize;
+}
+
+// ── Last Read Ayat ──
+function markLastRead(nomor, ayatNum){
+  const key = 'last_read_' + nomor;
+  const prev = load(key, null);
+
+  if(prev === ayatNum){
+    save(key, null);
+    showToast('📍 Penanda dihapus');
+  } else {
+    save(key, ayatNum);
+    showToast('✅ Ayat ' + ayatNum + ' ditandai sebagai terakhir dibaca');
+  }
+
+  document.querySelectorAll('.ayat-card').forEach(card => {
+    card.classList.remove('last-read');
+    const badge = card.querySelector('.last-read-badge');
+    if(badge) badge.remove();
+    const btn = card.querySelector('.ayat-action-btn');
+    if(btn) btn.classList.remove('marked');
+  });
+
+  const newMark = load(key, null);
+  if(newMark){
+    const card = document.getElementById('ayat-' + newMark);
+    if(card){
+      card.classList.add('last-read');
+      if(!card.querySelector('.last-read-badge')){
+        const badge = document.createElement('div');
+        badge.className = 'last-read-badge';
+        badge.textContent = '📍 Terakhir Dibaca';
+        card.insertBefore(badge, card.firstChild);
+      }
+      const btn = card.querySelector('.ayat-action-btn');
+      if(btn) btn.classList.add('marked');
+    }
+  }
+
+  const jumpBtn = document.getElementById('jump-last-btn');
+  if(jumpBtn) jumpBtn.style.display = newMark ? 'flex' : 'none';
+}
+
+function jumpToLastRead(){
+  if(!currentSurahNomor) return;
+  const key = 'last_read_' + currentSurahNomor;
+  const lastAyat = load(key, null);
+  if(!lastAyat){ showToast('⚠️ Belum ada penanda'); return; }
+  const card = document.getElementById('ayat-' + lastAyat);
+  if(card){
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+    card.style.transition = 'box-shadow 0.3s';
+    card.style.boxShadow = '0 0 0 4px rgba(201,168,76,0.5)';
+    setTimeout(function(){ card.style.boxShadow = ''; }, 1200);
+    showToast('📍 Melanjutkan dari Ayat ' + lastAyat);
+  }
+}
+
+// ── Fullscreen / Focus Mode ──
+let isFullscreen = false;
+function toggleFullscreen(){
+  const detail = document.getElementById('detail');
+  const fab = document.getElementById('fs-exit-fab');
+  const btn = document.getElementById('fs-btn');
+  isFullscreen = !isFullscreen;
+  if(isFullscreen){
+    detail.classList.add('fullscreen');
+    fab.classList.add('show');
+    if(btn) btn.innerHTML = '⛶ Normal';
+    showToast('⛶ Mode Fokus aktif — tekan ✕ untuk keluar');
+  } else {
+    detail.classList.remove('fullscreen');
+    fab.classList.remove('show');
+    if(btn) btn.innerHTML = '⛶ Fokus';
+  }
+}
+
+// ── Scroll Progress Bar ──
+let scrollProgressListener = null;
+function initScrollProgress(container, totalAyat){
+  const bar = document.getElementById('read-progress-bar');
+  const txt = document.getElementById('read-progress-text');
+  if(!bar) return;
+
+  bar.style.display = 'block';
+  bar.style.width = '0%';
+  if(txt) txt.textContent = '0%';
+
+  if(scrollProgressListener) container.removeEventListener('scroll', scrollProgressListener);
+
+  scrollProgressListener = function(){
+    const scrollTop = container.scrollTop;
+    const scrollHeight = container.scrollHeight - container.clientHeight;
+    if(scrollHeight <= 0){ bar.style.width='100%'; if(txt) txt.textContent='100%'; return; }
+    const pct = Math.round((scrollTop / scrollHeight) * 100);
+    bar.style.width = pct + '%';
+    if(txt) txt.textContent = pct + '%';
+  };
+
+  container.addEventListener('scroll', scrollProgressListener);
+}
+
+// ════════════════════════════════════════
+//  BOOKMARKS
+// ════════════════════════════════════════
+function toggleSurahBm(nomor){
+  const s = QURAN_DATA.find(x=>x.nomor===nomor);
+  if(!s) return;
+  const id = `surah_${nomor}`;
+  const idx = bookmarks.findIndex(b=>b.id===id);
+  const btn = document.getElementById('bm-surah-btn');
+  if(idx>=0){
+    bookmarks.splice(idx,1);
+    if(btn) btn.innerHTML = '🏷️ Simpan Surah';
+    showToast('Bookmark dihapus');
+  } else {
+    bookmarks.push({
+      id, nomor: s.nomor, nama: s.nama, namaLatin: s.namaLatin,
+      arti: s.arti, jumlahAyat: s.jumlahAyat, tempatTurun: s.tempatTurun,
+      savedAt: new Date().toISOString()
+    });
+    if(btn) btn.innerHTML = '🔖 Tersimpan';
+    showToast('✅ Surah disimpan ke bookmark');
+  }
+  save('bookmarks', bookmarks);
+  updateBmBadge();
+}
+
+function renderBookmarks(){
+  const el = document.getElementById('bm-list');
+  if(!bookmarks.length){
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🔖</div>
+      <h3>Belum Ada Bookmark</h3>
+      <p>Tap ikon 🏷️ Simpan Surah saat membaca untuk menyimpan surah favorit</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = bookmarks.map(b=>`
+    <div class="bm-card" style="cursor:pointer;" onclick="openDetail(${b.nomor})">
+      <div class="bm-card-header">
+        <div class="bm-label" style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--green-mid),var(--green-bright));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;">${b.nomor}</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-dark);">${b.namaLatin}</div>
+            <div style="font-size:12px;color:var(--text-light);">${b.arti} &bull; ${b.jumlahAyat} ayat &bull; ${b.tempatTurun}</div>
+          </div>
+        </div>
+        <button class="del-btn" onclick="event.stopPropagation();deleteBm('${b.id}')">🗑️</button>
+      </div>
+      <div class="bm-arab" style="font-size:26px;margin-top:8px;">${b.nama}</div>
+    </div>
+  `).join('');
+}
+
+function deleteBm(id){
+  const item = bookmarks.find(b=>b.id===id);
+  if(item) moveToTrash(item, 'bookmark');
+  bookmarks = bookmarks.filter(b=>b.id!==id);
+  save('bookmarks', bookmarks);
+  updateBmBadge();
+  renderBookmarks();
+  showToast('🗑️ Bookmark dipindah ke Sampah');
+}
+
+// ════════════════════════════════════════
+//  USER MENU
+// ════════════════════════════════════════
+function openUserMenu(){
+  if(!currentUser) return;
+  document.getElementById('menu-name').textContent = currentUser.nama;
+  document.getElementById('menu-email').textContent = currentUser.email;
+  refreshAvatar();
+  document.getElementById('dark-toggle').className = 'toggle' + (isDark?' on':'');
+  const sheet = document.getElementById('menu-sheet');
+  sheet.classList.remove('closing');
+  document.getElementById('user-menu').classList.add('open');
+}
+
+function refreshAvatar(){
+  const avatarEl = document.getElementById('menu-avatar');
+  const letterEl = document.getElementById('menu-avatar-letter');
+  const topbarBtn = document.getElementById('topbar-avatar');
+  const topbarLetter = document.getElementById('topbar-avatar-letter');
+  const moreAvatar = document.getElementById('more-avatar');
+  const moreAvatarLetter = document.getElementById('more-avatar-letter');
+  const moreTopbarName = document.getElementById('more-topbar-name');
+  const moreTopbarEmail = document.getElementById('more-topbar-email');
+  const photoKey = 'photo_' + currentUser.id;
+  const photo = load(photoKey, null);
+
+  // Update name & email in More topbar
+  if(moreTopbarName) moreTopbarName.textContent = currentUser.nama || '—';
+  if(moreTopbarEmail) moreTopbarEmail.textContent = currentUser.email || '—';
+
+  // Clean old imgs
+  const oldImg = avatarEl.querySelector('img');
+  if(oldImg) oldImg.remove();
+  const oldTopImg = topbarBtn ? topbarBtn.querySelector('img') : null;
+  if(oldTopImg) oldTopImg.remove();
+  const oldMoreImg = moreAvatar ? moreAvatar.querySelector('img') : null;
+  if(oldMoreImg) oldMoreImg.remove();
+
+  if(photo){
+    // User menu avatar
+    letterEl.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = photo;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+    avatarEl.insertBefore(img, letterEl);
+
+    // Home topbar avatar
+    if(topbarLetter) topbarLetter.style.display = 'none';
+    if(topbarBtn){
+      const tImg = document.createElement('img');
+      tImg.src = photo;
+      tImg.style.cssText = 'width:36px;height:36px;object-fit:cover;border-radius:50%;';
+      topbarBtn.insertBefore(tImg, topbarLetter);
+    }
+
+    // More topbar avatar
+    if(moreAvatarLetter) moreAvatarLetter.style.display = 'none';
+    if(moreAvatar){
+      const mImg = document.createElement('img');
+      mImg.src = photo;
+      mImg.style.cssText = 'width:34px;height:34px;object-fit:cover;border-radius:50%;';
+      moreAvatar.insertBefore(mImg, moreAvatarLetter);
+    }
+  } else {
+    // No photo — show initials
+    const initial = (currentUser.nama || '?')[0].toUpperCase();
+    letterEl.style.display = '';
+    letterEl.textContent = initial;
+    if(topbarLetter){
+      topbarLetter.style.display = '';
+      topbarLetter.textContent = initial;
+    }
+    if(moreAvatarLetter){
+      moreAvatarLetter.style.display = '';
+      moreAvatarLetter.textContent = initial;
+    }
+  }
+}
+
+function handlePhotoUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const dataUrl = ev.target.result;
+    const photoKey = 'photo_' + currentUser.id;
+    save(photoKey, dataUrl);
+    refreshAvatar();
+    showToast('✅ Foto profil diperbarui!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function closeUserMenu(){
+  const sheet = document.getElementById('menu-sheet');
+  sheet.classList.add('closing');
+  setTimeout(()=>{
+    document.getElementById('user-menu').classList.remove('open');
+    sheet.classList.remove('closing');
+  }, 240);
+}
+
+// ════════════════════════════════════════
+//  DARK MODE
+// ════════════════════════════════════════
+function toggleDarkMode(){
+  isDark = !isDark;
+  save('dark', isDark);
+  applyDark();
+  const cls = 'toggle' + (isDark?' on':'');
+  document.getElementById('dark-toggle').className = cls;
+  const st = document.getElementById('settings-dark-toggle');
+  if(st) st.className = cls;
+}
+
+function applyDark(){
+  document.documentElement.setAttribute('data-theme', isDark?'dark':'');
+}
+
+// ════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════
+function addHistory(s){
+  let history = load('history_read', []);
+  // Remove existing entry for same surah
+  history = history.filter(h=>h.nomor!==s.nomor);
+  // Add to front
+  history.unshift({
+    nomor:s.nomor, nama:s.nama, namaLatin:s.namaLatin,
+    arti:s.arti, jumlahAyat:s.jumlahAyat, tempatTurun:s.tempatTurun,
+    readAt: new Date().toISOString()
+  });
+  // Keep max 20 entries
+  if(history.length > 20) history = history.slice(0,20);
+  save('history_read', history);
+}
+
+function formatTime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if(diff < 60) return 'Baru saja';
+  if(diff < 3600) return Math.floor(diff/60) + ' menit lalu';
+  if(diff < 86400) return Math.floor(diff/3600) + ' jam lalu';
+  return d.toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
+}
+
+function renderHistory(){
+  const el = document.getElementById('hist-list');
+  const history = load('history_read', []);
+  if(!history.length){
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📜</div>
+      <h3>Belum Ada Riwayat</h3>
+      <p>Riwayat surah yang sudah kamu baca akan muncul di sini</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `
+    <button class="hist-clear-btn" onclick="clearHistory()">🗑️ Hapus Semua ke Sampah</button>
+    ${history.map(h=>`
+      <div class="hist-card" style="position:relative;">
+        <div onclick="openDetail(${h.nomor})" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer;">
+          <div class="hist-num">${h.nomor}</div>
+          <div class="hist-info">
+            <div class="hist-name">${h.namaLatin}</div>
+            <div class="hist-time">📖 ${h.arti} &bull; ${h.jumlahAyat} ayat &bull; ${formatTime(h.readAt)}</div>
+          </div>
+          <div class="hist-arabic">${h.nama}</div>
+        </div>
+        <button onclick="deleteHistoryItem(${h.nomor})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px;padding:6px;border-radius:8px;flex-shrink:0;" title="Hapus ke sampah">🗑️</button>
+      </div>
+    `).join('')}
+  `;
+}
+
+function deleteHistoryItem(nomor){
+  let history = load('history_read', []);
+  const item = history.find(h=>h.nomor===nomor);
+  if(item) moveToTrash(item, 'history');
+  history = history.filter(h=>h.nomor!==nomor);
+  save('history_read', history);
+  renderHistory();
+  showToast('🗑️ Riwayat dipindah ke Sampah');
+}
+
+function clearHistory(){
+  const history = load('history_read', []);
+  history.forEach(h=>moveToTrash(h,'history'));
+  save('history_read', []);
+  renderHistory();
+  showToast('🗑️ Semua riwayat dipindah ke Sampah');
+}
+
+
+// ════════════════════════════════════════
+//  TRASH (RIWAYAT SAMPAH)
+// ════════════════════════════════════════
+function moveToTrash(item, type){
+  let trash = load('trash_items', []);
+  trash = trash.filter(t=>!(t.nomor===item.nomor && t.type===type));
+  trash.unshift({ ...item, type, deletedAt: new Date().toISOString() });
+  if(trash.length > 50) trash = trash.slice(0,50);
+  save('trash_items', trash);
+}
+
+function moveAlarmToTrash(alarm){
+  let trash = load('trash_items', []);
+  trash = trash.filter(t=>!(t.id===alarm.id && t.type==='alarm'));
+  trash.unshift({ ...alarm, type:'alarm', deletedAt: new Date().toISOString() });
+  if(trash.length > 50) trash = trash.slice(0,50);
+  save('trash_items', trash);
+}
+
+function renderTrash(){
+  const el = document.getElementById('trash-list');
+  const toolbar = document.getElementById('trash-toolbar');
+  const trash = load('trash_items', []);
+  if(!trash.length){
+    toolbar.style.display = 'none';
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🗑️</div>
+      <h3>Sampah Kosong</h3>
+      <p>Item yang kamu hapus dari Riwayat, Bookmark &amp; Alarm akan muncul di sini</p>
+    </div>`;
+    return;
+  }
+  toolbar.style.display = 'flex';
+  const soundNames = {adzan:'🕌 Adzan',beep:'📳 Bip',quran:'📖 Tilawah',nature:'🌿 Alam',bell:'🔔 Lonceng'};
+  const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  el.innerHTML = trash.map(t=>{
+    const trashKey = t.type==='alarm' ? `alarm___${t.id}` : `${t.nomor}___${t.type}`;
+    let icon, title, subtitle, numDisplay, numStyle;
+    if(t.type==='alarm'){
+      icon='⏰';
+      title=`${t.time} — ${t.label}`;
+      const days = (t.days && t.days.length) ? ' &bull; '+t.days.sort().map(d=>dayNames[d]).join(', ') : '';
+      subtitle=(soundNames[t.sound]||t.sound)+days;
+      numDisplay='⏰';
+      numStyle='background:linear-gradient(135deg,#7c3aed,#a78bfa);font-size:18px;';
+    } else {
+      icon = t.type==='bookmark' ? '🔖' : '📜';
+      title = t.namaLatin;
+      subtitle = `${t.arti} &bull; ${t.jumlahAyat} ayat`;
+      numDisplay = t.nomor;
+      numStyle = '';
+    }
+    const typeLabel = t.type==='bookmark' ? 'Bookmark' : t.type==='alarm' ? 'Alarm' : 'Riwayat';
+    const arabicHtml = t.type!=='alarm' ? `<div class="trash-arabic">${t.nama}</div>` : '';
+    return `
+      <div class="trash-card">
+        <div class="trash-num" style="${numStyle}">${numDisplay}</div>
+        <div class="trash-info">
+          <div class="trash-name">${title}</div>
+          <div class="trash-time">${icon} ${typeLabel} &bull; ${subtitle} &bull; ${formatTime(t.deletedAt)}</div>
+        </div>
+        ${arabicHtml}
+        <div class="trash-actions">
+          <button class="trash-restore-btn" onclick="restoreTrashItem('${trashKey}')" title="Pulihkan">♻️</button>
+          <button class="trash-del-btn" onclick="permanentDeleteTrash('${trashKey}')" title="Hapus permanen">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function restoreTrashItem(key){
+  let trash = load('trash_items', []);
+  if(key.startsWith('alarm___')){
+    const alarmId = key.replace('alarm___','');
+    const item = trash.find(t=>t.id===alarmId && t.type==='alarm');
+    if(item){
+      alarms = load('alarms', []);
+      if(!alarms.find(a=>a.id===item.id)){
+        const {type, deletedAt, ...alarmData} = item;
+        alarms.push(alarmData);
+        save('alarms', alarms);
+      }
+      trash = trash.filter(t=>!(t.id===alarmId && t.type==='alarm'));
+      showToast('✅ Alarm dipulihkan');
+    }
+  } else {
+    const parts = key.split('___');
+    const nomor = parseInt(parts[0]); const type = parts[1];
+    const item = trash.find(t=>t.nomor===nomor && t.type===type);
+    if(item){
+      if(type==='bookmark'){
+        bookmarks = load('bookmarks', []);
+        if(!bookmarks.find(b=>b.id===item.id)){ bookmarks.push(item); save('bookmarks', bookmarks); }
+        showToast('✅ Bookmark dipulihkan');
+      } else {
+        let history = load('history_read', []);
+        history = history.filter(h=>h.nomor!==nomor);
+        history.unshift(item);
+        save('history_read', history);
+        showToast('✅ Riwayat dipulihkan');
+      }
+      trash = trash.filter(t=>!(t.nomor===nomor && t.type===type));
+    }
+  }
+  save('trash_items', trash);
+  updateBmBadge();
+  renderTrash();
+}
+
+function permanentDeleteTrash(key){
+  let trash = load('trash_items', []);
+  if(key.startsWith('alarm___')){
+    const alarmId = key.replace('alarm___','');
+    trash = trash.filter(t=>!(t.id===alarmId && t.type==='alarm'));
+  } else {
+    const parts = key.split('___');
+    const nomor = parseInt(parts[0]); const type = parts[1];
+    trash = trash.filter(t=>!(t.nomor===nomor && t.type===type));
+  }
+  save('trash_items', trash);
+  renderTrash();
+  showToast('🗑️ Dihapus permanen');
+}
+
+function restoreAllTrash(){
+  const trash = load('trash_items', []);
+  trash.forEach(t=>{
+    if(t.type==='alarm'){
+      alarms = load('alarms', []);
+      if(!alarms.find(a=>a.id===t.id)){
+        const {type, deletedAt, ...alarmData} = t;
+        alarms.push(alarmData);
+        save('alarms', alarms);
+      }
+    } else if(t.type==='bookmark'){
+      bookmarks = load('bookmarks', []);
+      if(!bookmarks.find(b=>b.id===t.id)){ bookmarks.push(t); save('bookmarks', bookmarks); }
+    } else {
+      let history = load('history_read', []);
+      history = history.filter(h=>h.nomor!==t.nomor);
+      history.unshift(t);
+      save('history_read', history);
+    }
+  });
+  save('trash_items', []);
+  updateBmBadge();
+  renderTrash();
+  showToast('✅ Semua item dipulihkan');
+}
+
+function clearAllTrash(){
+  save('trash_items', []);
+  renderTrash();
+  showToast('🗑️ Sampah dikosongkan permanen');
+}
+
+
+
+// ════════════════════════════════════════
+//  ALARM
+// ════════════════════════════════════════
+let alarms = [];
+let selectedSound = 'adzan';
+let selectedDays = [];
+let alarmCheckInterval = null;
+let ringAudioCtx = null;
+let ringNodes = [];
+let ringTimeout = null;
+
+function initAlarm(){
+  alarms = load('alarms', []);
+  renderAlarmList();
+  startLiveClock();
+  if(!alarmCheckInterval) alarmCheckInterval = setInterval(checkAlarms, 10000);
+}
+
+function startLiveClock(){
+  function tick(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    const el = document.getElementById('alarm-live-time');
+    const elDate = document.getElementById('alarm-live-date');
+    if(el) el.textContent = `${h}:${m}:${s}`;
+    if(elDate) elDate.textContent = now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  tick();
+  if(!window._clockInterval) window._clockInterval = setInterval(tick, 1000);
+}
+
+function selectSound(btn){
+  document.querySelectorAll('.sound-opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedSound = btn.dataset.sound;
+  previewSound(selectedSound);
+}
+
+function toggleDay(el){
+  el.classList.toggle('active');
+  const d = parseInt(el.dataset.day);
+  if(el.classList.contains('active')){
+    if(!selectedDays.includes(d)) selectedDays.push(d);
+  } else {
+    selectedDays = selectedDays.filter(x=>x!==d);
+  }
+}
+
+function addAlarm(){
+  const timeVal = document.getElementById('new-alarm-time').value;
+  const label = document.getElementById('new-alarm-label').value.trim() || 'Alarm';
+  if(!timeVal){ showToast('⚠️ Pilih waktu alarm'); return; }
+  const alarm = {
+    id: Date.now().toString(),
+    time: timeVal,
+    label,
+    sound: selectedSound,
+    days: [...selectedDays],
+    active: true
+  };
+  alarms.push(alarm);
+  save('alarms', alarms);
+  renderAlarmList();
+  showToast(`✅ Alarm ${timeVal} disimpan!`);
+  // reset form
+  document.getElementById('new-alarm-label').value = '';
+  document.getElementById('new-alarm-time').value = '05:00';
+  selectedDays = [];
+  selectedSound = 'adzan';
+  document.querySelectorAll('.sound-opt').forEach(b=>b.classList.toggle('selected', b.dataset.sound==='adzan'));
+  document.querySelectorAll('.day-chip').forEach(c=>c.classList.remove('active'));
+}
+
+function toggleAlarmActive(id){
+  const a = alarms.find(x=>x.id===id);
+  if(a){ a.active = !a.active; save('alarms', alarms); renderAlarmList(); }
+}
+
+function deleteAlarm(id){
+  const alarm = alarms.find(a=>a.id===id);
+  if(alarm) moveAlarmToTrash(alarm);
+  alarms = alarms.filter(a=>a.id!==id);
+  save('alarms', alarms);
+  renderAlarmList();
+  showToast('🗑️ Alarm dipindah ke Sampah');
+}
+
+function renderAlarmList(){
+  const el = document.getElementById('alarm-list');
+  if(!el) return;
+  if(!alarms.length){
+    el.innerHTML = `<div class="empty-state" style="padding:30px 20px;">
+      <div class="empty-icon">⏰</div>
+      <h3>Belum Ada Alarm</h3>
+      <p>Tambahkan alarm pengingat ibadah di atas</p>
+    </div>`;
+    return;
+  }
+  const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const soundNames = {adzan:'🕌 Adzan',beep:'📳 Bip',quran:'📖 Tilawah',nature:'🌿 Alam',bell:'🔔 Lonceng'};
+  el.innerHTML = alarms.map(a=>`
+    <div class="alarm-item ${a.active?'':'off'}">
+      <div>
+        <div class="alarm-item-time">${a.time}</div>
+      </div>
+      <div class="alarm-item-info">
+        <div class="alarm-item-label">${a.label}</div>
+        <div class="alarm-item-meta">
+          ${soundNames[a.sound]||a.sound}
+          ${a.days.length ? ' &bull; ' + a.days.sort().map(d=>dayNames[d]).join(', ') : ' &bull; Sekali'}
+        </div>
+      </div>
+      <button class="toggle ${a.active?'on':''}" onclick="toggleAlarmActive('${a.id}')" style="flex-shrink:0;"></button>
+      <button class="alarm-item-del" onclick="deleteAlarm('${a.id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function checkAlarms(){
+  const now = new Date();
+  const curTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const curDay = now.getDay();
+  alarms.forEach(a=>{
+    if(!a.active) return;
+    if(a.time !== curTime) return;
+    if(a.days.length > 0 && !a.days.includes(curDay)) return;
+    // Only trigger once per minute using a flag
+    const key = `alarm_fired_${a.id}_${curTime}`;
+    if(sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    triggerAlarm(a);
+  });
+}
+
+function triggerAlarm(alarm){
+  document.getElementById('ring-time').textContent = alarm.time;
+  document.getElementById('ring-label').textContent = alarm.label;
+  document.getElementById('alarm-ringing').classList.add('show');
+  playAlarmSound(alarm.sound);
+  // auto stop after 60s
+  ringTimeout = setTimeout(()=>stopAlarm(), 60000);
+}
+
+function stopAlarm(){
+  document.getElementById('alarm-ringing').classList.remove('show');
+  stopAlarmSound();
+  clearTimeout(ringTimeout);
+}
+
+// ── Web Audio alarm sounds ──
+function previewSound(type){
+  stopAlarmSound();
+  playAlarmSound(type, true);
+  setTimeout(()=>stopAlarmSound(), 2000);
+}
+
+function playAlarmSound(type, preview=false){
+  stopAlarmSound();
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ringAudioCtx = ctx;
+    ringNodes = [];
+    const patterns = {
+      adzan: [523,659,784,1047,784,659,523],
+      beep:  [880,880,880],
+      quran: [440,495,523,587,659,587,523,495],
+      nature:[330,392,440,392,330,294],
+      bell:  [1047,988,880,784]
+    };
+    const freqs = patterns[type] || patterns.beep;
+    let t = ctx.currentTime + 0.05;
+    const repeat = preview ? 1 : 99;
+    for(let r=0;r<repeat;r++){
+      freqs.forEach((freq,i)=>{
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = (type==='bell'||type==='adzan') ? 'sine' : 'square';
+        osc.frequency.setValueAtTime(freq, t + i*0.18);
+        gain.gain.setValueAtTime(0.4, t + i*0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + i*0.18 + 0.16);
+        osc.start(t + i*0.18);
+        osc.stop(t + i*0.18 + 0.18);
+        ringNodes.push(osc);
+      });
+      t += freqs.length * 0.18 + 0.6;
+    }
+  } catch(e){ console.warn('Audio error:', e); }
+}
+
+function stopAlarmSound(){
+  try {
+    ringNodes.forEach(n=>{ try{n.stop()}catch(e){} });
+    ringNodes = [];
+    if(ringAudioCtx){ ringAudioCtx.close().catch(()=>{}); ringAudioCtx = null; }
+  } catch(e){}
+}
+
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+
+// ════════════════════════════════════════
+//  DOA HARIAN DATA
+// ════════════════════════════════════════
+const DOA_DATA = {
+  'Pagi': [
+    { icon:'🌅', title:'Doa Bangun Tidur', arab:'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ', latin:'Alhamdulillāhillażī aḥyānā ba\'da mā amātanā wa ilaihin-nusyūr', terjemahan:'Segala puji bagi Allah yang menghidupkan kami setelah mematikan kami, dan kepada-Nya lah kami dibangkitkan.' },
+    { icon:'🍽️', title:'Doa Sebelum Makan', arab:'اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ', latin:'Allāhumma bārik lanā fīmā razaqtanā wa qinā \'ażāban-nār', terjemahan:'Ya Allah, berkahilah kami dalam rezeki yang Engkau berikan kepada kami, dan jagalah kami dari siksa api neraka.' },
+    { icon:'🤲', title:'Doa Keluar Rumah', arab:'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ', latin:'Bismillāhi tawakkaltu \'alallāhi wa lā ḥaula wa lā quwwata illā billāh', terjemahan:'Dengan nama Allah, aku bertawakal kepada Allah. Tidak ada daya dan kekuatan kecuali dengan Allah.' },
+  ],
+  'Siang': [
+    { icon:'🍴', title:'Doa Sesudah Makan', arab:'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ', latin:'Alhamdulillāhillażī aṭ\'amanā wa saqānā wa ja\'alanā muslimīn', terjemahan:'Segala puji bagi Allah yang telah memberi kami makan dan minum, serta menjadikan kami orang-orang Muslim.' },
+    { icon:'🚗', title:'Doa Naik Kendaraan', arab:'سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ', latin:'Subḥānallażī sakhkhara lanā hāżā wa mā kunnā lahụ muqrinīn', terjemahan:'Maha Suci (Allah) yang telah menundukkan ini bagi kami, padahal sebelumnya kami tidak mampu menguasainya.' },
+    { icon:'📚', title:'Doa Sebelum Belajar', arab:'رَبِّ زِدْنِي عِلْمًا وَارْزُقْنِي فَهْمًا', latin:'Rabbi zidnī \'ilman warzuqnī fahmā', terjemahan:'Ya Tuhanku, tambahkanlah ilmu kepadaku dan berilah aku pemahaman.' },
+  ],
+  'Malam': [
+    { icon:'😴', title:'Doa Sebelum Tidur', arab:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا', latin:'Bismikallāhumma amụtu wa aḥyā', terjemahan:'Dengan nama-Mu ya Allah, aku mati dan aku hidup.' },
+    { icon:'🌙', title:'Doa Masuk Rumah', arab:'اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلَجِ وَخَيْرَ الْمَخْرَجِ', latin:'Allāhumma innī as\'aluka khairol-maulaji wa khairol-makhraj', terjemahan:'Ya Allah, sesungguhnya aku memohon kepada-Mu kebaikan saat masuk dan kebaikan saat keluar.' },
+    { icon:'🛡️', title:'Doa Perlindungan Malam', arab:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ', latin:'A\'ūżu bikalimātillāhit-tāmmāti min syarri mā khalaq', terjemahan:'Aku berlindung dengan kalimat-kalimat Allah yang sempurna dari segala keburukan makhluk yang Dia ciptakan.' },
+  ],
+  'Sholat': [
+    { icon:'🕌', title:'Doa Masuk Masjid', arab:'اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ', latin:'Allāhumma iftaḥ lī abwāba raḥmatik', terjemahan:'Ya Allah, bukakanlah untukku pintu-pintu rahmat-Mu.' },
+    { icon:'🕌', title:'Doa Keluar Masjid', arab:'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ', latin:'Allāhumma innī as\'aluka min faḍlik', terjemahan:'Ya Allah, sesungguhnya aku memohon kepada-Mu dari karunia-Mu.' },
+    { icon:'🤲', title:'Doa Qunut', arab:'اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ', latin:'Allāhummahdinī fīman hadayt', terjemahan:'Ya Allah, berikanlah petunjuk kepadaku sebagaimana Engkau telah memberikan petunjuk kepada orang-orang yang Engkau beri petunjuk.' },
+  ],
+};
+
+let currentDoaKategori = 'Pagi';
+
+function initDoa(){
+  const tabs = document.getElementById('doa-tabs');
+  if(!tabs) return;
+  tabs.innerHTML = Object.keys(DOA_DATA).map(k =>
+    `<button class="doa-tab ${k===currentDoaKategori?'active':''}" onclick="switchDoa('${k}')">${k}</button>`
+  ).join('');
+  renderDoa();
+}
+
+function switchDoa(k){
+  currentDoaKategori = k;
+  document.querySelectorAll('.doa-tab').forEach(t => t.classList.toggle('active', t.textContent===k));
+  renderDoa();
+}
+
+function renderDoa(){
+  const el = document.getElementById('doa-list');
+  if(!el) return;
+  const list = DOA_DATA[currentDoaKategori] || [];
+  el.innerHTML = list.map(d => `
+    <div class="doa-card">
+      <div class="doa-card-header">
+        <span class="doa-icon">${d.icon}</span>
+        <span class="doa-title">${d.title}</span>
+      </div>
+      <div class="doa-arab">${d.arab}</div>
+      <div class="doa-latin">${d.latin}</div>
+      <div class="doa-terjemahan">${d.terjemahan}</div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+//  JADWAL SHOLAT
+// ════════════════════════════════════════
+// ── JADWAL SHOLAT — Database 50 Kota Indonesia ──
+const SHOLAT_DB = {
+  // Format: [Subuh, Dzuhur, Ashar, Maghrib, Isya]
+  // Data rata-rata tahunan per kota (WIB/WITA/WIT)
+  'jakarta'      : ['04:32','11:53','15:14','17:52','19:04'],
+  'bogor'        : ['04:33','11:54','15:15','17:53','19:05'],
+  'depok'        : ['04:33','11:54','15:14','17:53','19:05'],
+  'tangerang'    : ['04:32','11:53','15:14','17:52','19:04'],
+  'bekasi'       : ['04:31','11:52','15:13','17:51','19:03'],
+  'bandung'      : ['04:35','11:56','15:17','17:55','19:07'],
+  'cirebon'      : ['04:30','11:51','15:12','17:50','19:02'],
+  'sukabumi'     : ['04:36','11:57','15:18','17:56','19:08'],
+  'tasikmalaya'  : ['04:34','11:55','15:16','17:54','19:06'],
+  'garut'        : ['04:35','11:56','15:17','17:55','19:07'],
+  'semarang'     : ['04:22','11:43','15:04','17:42','18:54'],
+  'solo'         : ['04:23','11:44','15:05','17:43','18:55'],
+  'surakarta'    : ['04:23','11:44','15:05','17:43','18:55'],
+  'yogyakarta'   : ['04:25','11:46','15:07','17:45','18:57'],
+  'jogja'        : ['04:25','11:46','15:07','17:45','18:57'],
+  'magelang'     : ['04:24','11:45','15:06','17:44','18:56'],
+  'purwokerto'   : ['04:26','11:47','15:08','17:46','18:58'],
+  'tegal'        : ['04:27','11:48','15:09','17:47','18:59'],
+  'pekalongan'   : ['04:25','11:46','15:07','17:45','18:57'],
+  'surabaya'     : ['04:13','11:34','14:55','17:33','18:45'],
+  'malang'       : ['04:14','11:35','14:56','17:34','18:46'],
+  'lumajang'     : ['04:12','11:33','14:54','17:32','18:44'],
+  'jember'       : ['04:10','11:31','14:52','17:30','18:42'],
+  'banyuwangi'   : ['04:07','11:28','14:49','17:27','18:39'],
+  'probolinggo'  : ['04:11','11:32','14:53','17:31','18:43'],
+  'pasuruan'     : ['04:12','11:33','14:54','17:32','18:44'],
+  'sidoarjo'     : ['04:13','11:34','14:55','17:33','18:45'],
+  'mojokerto'    : ['04:14','11:35','14:56','17:34','18:46'],
+  'kediri'       : ['04:16','11:37','14:58','17:36','18:48'],
+  'blitar'       : ['04:15','11:36','14:57','17:35','18:47'],
+  'tulungagung'  : ['04:16','11:37','14:58','17:36','18:48'],
+  'madiun'       : ['04:18','11:39','15:00','17:38','18:50'],
+  'ngawi'        : ['04:19','11:40','15:01','17:39','18:51'],
+  'bojonegoro'   : ['04:17','11:38','14:59','17:37','18:49'],
+  'tuban'        : ['04:16','11:37','14:58','17:36','18:48'],
+  'lamongan'     : ['04:14','11:35','14:56','17:34','18:46'],
+  'gresik'       : ['04:13','11:34','14:55','17:33','18:45'],
+  'bangkalan'    : ['04:12','11:33','14:54','17:32','18:44'],
+  'pamekasan'    : ['04:10','11:31','14:52','17:30','18:42'],
+  'medan'        : ['04:48','12:12','15:33','18:16','19:29'],
+  'binjai'       : ['04:49','12:13','15:34','18:17','19:30'],
+  'pekanbaru'    : ['04:43','12:07','15:28','18:10','19:22'],
+  'palembang'    : ['04:38','12:00','15:21','18:02','19:14'],
+  'lampung'      : ['04:37','11:58','15:19','18:00','19:12'],
+  'bandar lampung':['04:37','11:58','15:19','18:00','19:12'],
+  'bengkulu'     : ['04:42','12:04','15:25','18:07','19:19'],
+  'jambi'        : ['04:40','12:02','15:23','18:04','19:16'],
+  'padang'       : ['04:46','12:10','15:31','18:13','19:25'],
+  'bukittinggi'  : ['04:47','12:11','15:32','18:14','19:26'],
+  'batam'        : ['04:39','12:01','15:22','18:03','19:15'],
+  'pontianak'    : ['04:34','11:55','15:16','17:54','19:06'],
+  'palangkaraya' : ['04:23','11:44','15:05','17:43','18:55'],
+  'banjarmasin'  : ['05:01','12:22','15:43','18:22','19:34'],
+  'balikpapan'   : ['04:55','12:16','15:37','18:16','19:28'],
+  'samarinda'    : ['04:53','12:14','15:35','18:14','19:26'],
+  'makassar'     : ['04:50','12:11','15:32','18:11','19:23'],
+  'ujungpandang' : ['04:50','12:11','15:32','18:11','19:23'],
+  'pare-pare'    : ['04:51','12:12','15:33','18:12','19:24'],
+  'kendari'      : ['04:42','12:03','15:24','18:03','19:15'],
+  'palu'         : ['04:44','12:05','15:26','18:05','19:17'],
+  'manado'       : ['04:36','11:57','15:18','17:57','19:09'],
+  'gorontalo'    : ['04:38','11:59','15:20','17:59','19:11'],
+  'ternate'      : ['04:26','11:47','15:08','17:47','18:59'],
+  'ambon'        : ['04:19','11:40','15:01','17:40','18:52'],
+  'denpasar'     : ['04:55','12:16','15:37','18:16','19:28'],
+  'bali'         : ['04:55','12:16','15:37','18:16','19:28'],
+  'mataram'      : ['04:52','12:13','15:34','18:13','19:25'],
+  'lombok'       : ['04:52','12:13','15:34','18:13','19:25'],
+  'kupang'       : ['04:42','12:03','15:24','18:03','19:15'],
+  'jayapura'     : ['04:10','11:31','14:52','17:31','18:43'],
+  'sorong'       : ['04:22','11:43','15:04','17:43','18:55'],
+  'manokwari'    : ['04:20','11:41','15:02','17:41','18:53'],
+};
+
+function initSholat(){
+  const city = load('sholat_city', 'Lumajang');
+  document.getElementById('sholat-city-input').value = city;
+  renderSholatTimes(city);
+}
+
+function loadSholatByCity(){
+  const input = document.getElementById('sholat-city-input').value.trim();
+  if(!input){ showToast('⚠️ Masukkan nama kota terlebih dahulu'); return; }
+  save('sholat_city', input);
+  renderSholatTimes(input);
+}
+
+function renderSholatTimes(city){
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const cityKey = city.toLowerCase().trim().replace(/[^a-z\-]/g, '');
+
+  // Cari di database
+  const data = SHOLAT_DB[cityKey];
+
+  if(!data){
+    document.getElementById('sholat-city-display').textContent = '❌ Kota tidak ditemukan';
+    document.getElementById('sholat-date-display').textContent = '—';
+    document.getElementById('sholat-next-name').textContent = '—';
+    document.getElementById('sholat-next-time').textContent = '—';
+    // Cari kota mirip
+    const similar = Object.keys(SHOLAT_DB).filter(k => k.includes(cityKey) || cityKey.includes(k)).slice(0,5);
+    document.getElementById('sholat-list').innerHTML = `
+      <div style="text-align:center;padding:30px 20px;color:var(--text-light);">
+        <div style="font-size:40px;margin-bottom:10px;">😕</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-mid);margin-bottom:8px;">Kota "${city}" belum tersedia</div>
+        ${similar.length ? '<div style="font-size:12px;margin-bottom:8px;">Mungkin maksudnya:<br><strong>' + similar.map(k=>k.charAt(0).toUpperCase()+k.slice(1)).join(' • ') + '</strong></div>' : ''}
+        <div style="font-size:11px;line-height:1.8;">Kota tersedia antara lain:<br>
+        <strong>Lumajang • Surabaya • Malang • Jakarta<br>Bandung • Semarang • Yogyakarta • Medan<br>Makassar • Denpasar • Palembang • Pekanbaru</strong></div>
+      </div>`;
+    showToast('❌ Kota "' + city + '" belum ada di database');
+    return;
+  }
+
+  const names  = ['Subuh','Dzuhur','Ashar','Maghrib','Isya'];
+  const icons  = ['🌙','☀️','🌤️','🌅','🌃'];
+  const times  = data.map((t, i) => {
+    const parts = t.split(':');
+    const h = parseInt(parts[0]);
+    const m = parseInt(parts[1]);
+    return { name: names[i], icon: icons[i], time: t, totalMin: h * 60 + m };
+  });
+
+  let nextIdx = times.findIndex(t => t.totalMin > nowMin);
+  if(nextIdx < 0) nextIdx = 0;
+
+  const diffMin = times[nextIdx].totalMin - nowMin;
+  const absDiff = Math.abs(diffMin);
+  const diffH = Math.floor(absDiff / 60);
+  const diffM = absDiff % 60;
+  const countdown = diffMin > 0
+    ? (diffH > 0 ? diffH + ' jam ' : '') + diffM + ' menit lagi'
+    : 'Sekarang';
+
+  document.getElementById('sholat-city-display').textContent = '📍 ' + city.charAt(0).toUpperCase() + city.slice(1) + ', Indonesia';
+  document.getElementById('sholat-date-display').textContent = now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sholat-next-name').textContent = times[nextIdx].name;
+  document.getElementById('sholat-next-time').textContent = times[nextIdx].time + '  (' + countdown + ')';
+
+  document.getElementById('sholat-list').innerHTML = times.map((t, i) => `
+    <div class="sholat-item ${i === nextIdx ? 'next' : ''}">
+      <span class="sholat-name">
+        ${t.icon} ${t.name}
+        ${i === nextIdx ? '<span class="sholat-next-badge">Berikutnya</span>' : ''}
+      </span>
+      <span class="sholat-time">${t.time}</span>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+//  HADITS PILIHAN DATA
+// ════════════════════════════════════════
+const HADITS_DATA = [
+  { num:1, source:'HR. Bukhari & Muslim', arab:'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ', terjemahan:'Sesungguhnya setiap amalan tergantung pada niatnya. Dan sesungguhnya setiap orang akan mendapatkan sesuai dengan yang ia niatkan.', perawi:'Diriwayatkan dari Umar bin Khattab RA' },
+  { num:2, source:'HR. Muslim', arab:'الدِّينُ النَّصِيحَةُ', terjemahan:'Agama adalah nasihat. Kami bertanya: Untuk siapa? Beliau menjawab: Untuk Allah, untuk kitab-Nya, untuk Rasul-Nya, untuk pemimpin kaum muslimin, dan untuk kaum muslimin pada umumnya.', perawi:'Diriwayatkan dari Tamim Ad-Dari RA' },
+  { num:3, source:'HR. Bukhari & Muslim', arab:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', terjemahan:'Barangsiapa beriman kepada Allah dan hari akhir, hendaklah ia berkata yang baik atau diam.', perawi:'Diriwayatkan dari Abu Hurairah RA' },
+  { num:4, source:'HR. Tirmidzi', arab:'اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ', terjemahan:'Bertakwalah kepada Allah di mana pun engkau berada, ikutilah perbuatan buruk dengan perbuatan baik niscaya ia akan menghapusnya, dan bergaullah dengan manusia dengan akhlak yang baik.', perawi:'Diriwayatkan dari Abu Dzarr dan Muadz bin Jabal RA' },
+  { num:5, source:'HR. Bukhari', arab:'خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ', terjemahan:'Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.', perawi:'Diriwayatkan dari Jabir bin Abdillah RA' },
+  { num:6, source:'HR. Muslim', arab:'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ', terjemahan:'Tidaklah beriman seorang di antara kalian sehingga ia mencintai saudaranya sebagaimana ia mencintai dirinya sendiri.', perawi:'Diriwayatkan dari Anas bin Malik RA' },
+  { num:7, source:'HR. Ibnu Majah', arab:'طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ', terjemahan:'Mencari ilmu adalah kewajiban bagi setiap Muslim.', perawi:'Diriwayatkan dari Anas bin Malik RA' },
+  { num:8, source:'HR. Bukhari', arab:'الصَّبْرُ ضِيَاءٌ', terjemahan:'Sabar adalah cahaya.', perawi:'Diriwayatkan dari Abu Malik Al-Ashari RA' },
+];
+
+function renderHadits(){
+  const el = document.getElementById('hadits-list');
+  if(!el) return;
+  el.innerHTML = HADITS_DATA.map(h => `
+    <div class="hadits-card">
+      <div class="hadits-header">
+        <div class="hadits-num">${h.num}</div>
+        <div class="hadits-source">${h.source}</div>
+      </div>
+      <div class="hadits-arab">${h.arab}</div>
+      <div class="hadits-terjemahan">${h.terjemahan}</div>
+      <div class="hadits-perawi">${h.perawi}</div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+//  PROFIL & GANTI PASSWORD
+// ════════════════════════════════════════
+function initProfil(){
+  if(!currentUser) return;
+  document.getElementById('profil-nama').value = currentUser.nama || '';
+  document.getElementById('profil-email').value = currentUser.email || '';
+  document.getElementById('profil-name-display').textContent = currentUser.nama || '—';
+  document.getElementById('profil-email-display').textContent = currentUser.email || '—';
+
+  // avatar
+  const avatarEl = document.getElementById('profil-avatar');
+  const letterEl = document.getElementById('profil-avatar-letter');
+  const photo = load('photo_' + currentUser.id, null);
+  const oldImg = avatarEl.querySelector('img');
+  if(oldImg) oldImg.remove();
+  if(photo){
+    letterEl.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = photo;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+    avatarEl.insertBefore(img, letterEl);
+  } else {
+    letterEl.style.display = '';
+    letterEl.textContent = (currentUser.nama||'?')[0].toUpperCase();
+  }
+  document.getElementById('err-profil').style.display = 'none';
+}
+
+function saveProfil(){
+  const nama = document.getElementById('profil-nama').value.trim();
+  const email = document.getElementById('profil-email').value.trim();
+  const err = document.getElementById('err-profil');
+  if(!nama || !email){ err.textContent='Nama dan email wajib diisi'; err.style.display='block'; return; }
+  // Check email not taken by other user
+  const users = load('users',[]);
+  const conflict = users.find(u => u.email===email && u.id!==currentUser.id);
+  if(conflict){ err.textContent='Email sudah digunakan akun lain'; err.style.display='block'; return; }
+  // Update
+  const idx = users.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0){ users[idx].nama = nama; users[idx].email = email; save('users', users); }
+  currentUser.nama = nama; currentUser.email = email;
+  save('current_user', currentUser);
+  document.getElementById('hero-name').textContent = nama;
+  refreshAvatar();
+  initProfil();
+  showToast('✅ Profil berhasil diperbarui!');
+  err.style.display = 'none';
+}
+
+function saveGantiPass(){
+  const lama = document.getElementById('pass-lama').value;
+  const baru = document.getElementById('pass-baru').value;
+  const konfirm = document.getElementById('pass-konfirm').value;
+  const err = document.getElementById('err-gantipass');
+  if(!lama||!baru||!konfirm){ err.textContent='Semua field wajib diisi'; err.style.display='block'; return; }
+  if(lama !== currentUser.password){ err.textContent='Password lama tidak sesuai'; err.style.display='block'; return; }
+  if(baru.length < 6){ err.textContent='Password baru minimal 6 karakter'; err.style.display='block'; return; }
+  if(baru !== konfirm){ err.textContent='Konfirmasi password tidak cocok'; err.style.display='block'; return; }
+  const users = load('users',[]);
+  const idx = users.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0){ users[idx].password = baru; save('users', users); }
+  currentUser.password = baru;
+  save('current_user', currentUser);
+  document.getElementById('pass-lama').value = '';
+  document.getElementById('pass-baru').value = '';
+  document.getElementById('pass-konfirm').value = '';
+  err.style.display = 'none';
+  showToast('✅ Password berhasil diganti!');
+}
+
+// ════════════════════════════════════════
+//  SETTINGS: TEMA, FONT ARAB, BAHASA
+// ════════════════════════════════════════
+let currentTheme = 'hijau';
+let currentArabFont = 'uthmani';
+let currentLang = 'id';
+
+function initSettings(){
+  currentTheme = load('theme_color','hijau');
+  currentArabFont = load('arab_font','uthmani');
+  currentLang = load('app_lang','id');
+
+  // Mark active chips
+  document.querySelectorAll('.theme-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.color === currentTheme);
+  });
+  document.querySelectorAll('.font-arab-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.font === currentArabFont);
+  });
+  document.querySelectorAll('.lang-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+
+  // Sync dark toggle in settings
+  const dt = document.getElementById('settings-dark-toggle');
+  if(dt) dt.className = 'toggle' + (isDark ? ' on' : '');
+}
+
+function applyThemeColor(chip){
+  currentTheme = chip.dataset.color;
+  save('theme_color', currentTheme);
+  document.querySelectorAll('.theme-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  if(currentTheme === 'hijau'){
+    document.documentElement.removeAttribute('data-theme-color');
+  } else {
+    document.documentElement.setAttribute('data-theme-color', currentTheme);
+  }
+  showToast('🎨 Tema ' + currentTheme + ' diterapkan');
+}
+
+function applyArabFont(btn){
+  currentArabFont = btn.dataset.font;
+  save('arab_font', currentArabFont);
+  document.querySelectorAll('.font-arab-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.remove('arab-font-uthmani','arab-font-modern');
+  document.body.classList.add('arab-font-' + currentArabFont);
+  showToast('🔤 Font Arab diperbarui');
+}
+
+function applyLang(btn){
+  currentLang = btn.dataset.lang;
+  save('app_lang', currentLang);
+  document.querySelectorAll('.lang-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.documentElement.setAttribute('data-lang', currentLang);
+  showToast(currentLang === 'id' ? '🇮🇩 Bahasa Indonesia aktif' : '🇬🇧 English active');
+}
+
+function applyAllSettings(){
+  // Theme
+  const theme = load('theme_color','hijau');
+  if(theme !== 'hijau') document.documentElement.setAttribute('data-theme-color', theme);
+  // Font
+  const font = load('arab_font','uthmani');
+  document.body.classList.add('arab-font-' + font);
+  // Lang
+  const lang = load('app_lang','id');
+  document.documentElement.setAttribute('data-lang', lang);
+}
+
+
+
+
+// ════════════════════════════════════════
+//  PWA — INSTALL & SERVICE WORKER
+// ════════════════════════════════════════
+let deferredPrompt = null;
+
+// Tangkap event install
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Tampilkan banner setelah 3 detik jika belum pernah dismiss
+  if(!load('pwa_dismissed', false)){
+    setTimeout(() => {
+      const banner = document.getElementById('pwa-banner');
+      if(banner) banner.style.display = 'flex';
+    }, 3000);
+  }
+});
+
+// Tombol Install diklik
+document.addEventListener('DOMContentLoaded', () => {
+  const installBtn = document.getElementById('pwa-install-btn');
+  if(installBtn){
+    installBtn.addEventListener('click', async () => {
+      if(!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('pwa-banner').style.display = 'none';
+      if(outcome === 'accepted'){
+        showToast('✅ Al-Quran Digital berhasil diinstall!');
+      }
+    });
+  }
+});
+
+function dismissPWA(){
+  document.getElementById('pwa-banner').style.display = 'none';
+  save('pwa_dismissed', true);
+}
+
+// Deteksi sudah diinstall
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-banner').style.display = 'none';
+  showToast('✅ Aplikasi berhasil diinstall di HP kamu!');
+});
+
+// Register Service Worker (hanya aktif di GitHub Pages / HTTPS)
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(() => {}); // skip jika sw.js tidak ada
+  });
+}
+
+</script>
+</body>
+</html>
