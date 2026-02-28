@@ -1,0 +1,27 @@
+{
+  "name": "Al-Qur'an Digital",
+  "short_name": "Al-Qur'an",
+  "description": "Aplikasi Al-Qur'an Digital lengkap dengan terjemahan, doa harian, jadwal sholat, dan hadits pilihan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d3b1e",
+  "theme_color": "#0d3b1e",
+  "orientation": "portrait",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230d3b1e'/><text y='130' x='50%' font-size='110' text-anchor='middle'>📖</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230d3b1e'/><text y='360' x='50%' font-size='300' text-anchor='middle'>📖</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["education", "religion", "lifestyle"]
+}
